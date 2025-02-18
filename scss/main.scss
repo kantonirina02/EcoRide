@@ -1,2 +1,12 @@
 @import url(/node_modules/bootstrap-icons/font/bootstrap-icons.css);
-@import '_custom';
+@import 'custom';
+
+html{
+    position: relative;
+    min-height: 100%;
+}
+footer.footer{
+    padding: 30px;
+    position: absolute;
+    bottom: 0;width: 100%;
+}
