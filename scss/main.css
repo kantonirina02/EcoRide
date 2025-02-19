@@ -12171,10 +12171,6 @@ p {
   font-size: smaller;
 }
 
-input {
-  font-size: 10px;
-}
-
 .role-section {
   padding: 20px;
   border-radius: 8px;
@@ -12198,15 +12194,28 @@ input {
   cursor: pointer;
   background-color: #3498DB;
   color: white;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
-
+.role-btn:hover {
+  background-color: #217dbb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 .role-btn.active {
-  background-color: var(--dark-green);
+  background-color: #2ECC71;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .driver-form {
   display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: translateY(-10px);
+}
+.driver-form.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .form-group {
@@ -12221,13 +12230,27 @@ label {
 
 input, select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+input:focus, select:focus {
+  border-color: #2ECC71;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
 }
 
 .preferences {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  padding: 15px;
+}
+@media (max-width: 768px) {
+  .preferences {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
 }/*# sourceMappingURL=main.css.map */

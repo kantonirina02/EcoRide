@@ -3,13 +3,15 @@
         <h2>Mon Profil</h2>
         
         <div class="role-options">
-            <button class="role-btn" data-role="driver">Chauffeur</button>
-            <button class="role-btn" data-role="passenger">Passager</button>
-            <button class="role-btn" data-role="both">Les deux</button>
+            <button class="role-btn" data-role="driver" id="driverBtn">Chauffeur</button>
+            <button class="role-btn" data-role="passenger" id="passengerBtn">Passager</button>
+            <button class="role-btn" data-role="both" id="bothBtn">Les deux</button>
         </div>
+
     
         <!-- Formulaire chauffeur -->
-        <form id="driverForm" class="driver-form">
+        <form id="driverForm" class="driver-form hidden">
+
             <h3>Informations Chauffeur</h3>
             
             <div class="form-group">
@@ -48,9 +50,12 @@
         </form>
     </div>
     <div class="text-center">
-        <button type="submit" class="btn btn-primary">Modifier vos information</button>
+        <button type="submit" class="btn btn-primary" id="editInfoBtn">Modifier vos information</button>
     </div>
     <div class="text-center pt-3">
         <a href="/editPassword">Cliquez ici pour modifier votre mot de passe</a>
     </div>
+    <script src="../js/auth/account.js"></script>
+
+
 </section>
