@@ -151,10 +151,6 @@ p{
     text-align: center;
     font-weight: bold;
 }
-.details {
-    flex-grow: 1;
-    text-align: right;
-}
 .buttons {
     display: flex;
     gap: 10px;
@@ -178,3 +174,18 @@ p{
     background-color: $dark;
     color: black;
 }
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+    padding: 20px;
+  }
+ .filterForm{
+    font-size: smaller;
+ }
+ input{
+    font-size: 10px;
+ }
+ 
