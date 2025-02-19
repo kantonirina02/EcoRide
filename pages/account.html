@@ -1,0 +1,56 @@
+<section class="text-center">
+    <div class="role-section">
+        <h2>Mon Profil</h2>
+        
+        <div class="role-options">
+            <button class="role-btn" data-role="driver">Chauffeur</button>
+            <button class="role-btn" data-role="passenger">Passager</button>
+            <button class="role-btn" data-role="both">Les deux</button>
+        </div>
+    
+        <!-- Formulaire chauffeur -->
+        <form id="driverForm" class="driver-form">
+            <h3>Informations Chauffeur</h3>
+            
+            <div class="form-group">
+                <label for="licensePlate">Plaque d'immatriculation</label>
+                <input type="text" id="licensePlate" name="licensePlate" required pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" title="Plaque d'immatriculation" placeholder="AA-123-BB">
+            </div>
+    
+            <div class="form-group">
+                <label for="firstRegistration">Date première immatriculation</label>
+                <input type="date" id="firstRegistration" name="firstRegistration" required title="Date première immatriculation" placeholder="JJ/MM/AAAA">
+            </div>
+    
+            <div class="form-group">
+                <label for="vehicleSelect">Véhicule</label>
+                <select id="vehicleSelect" name="vehicule" required title="Sélectionner un véhicule">
+                    <option value="">Sélectionner un véhicule</option>
+                    <!-- Options dynamiques via JS -->
+                </select>
+            </div>
+    
+            <div class="form-group">
+                <label for="availableSeats">Places disponibles</label>
+                <input type="number" id="availableSeats" name="availableSeats" min="1" max="8" required title="Nombre de places disponibles" placeholder="Nombre de places">
+            </div>
+    
+            <div class="form-group">
+                <label>Préférences</label>
+                <div class="preferences">
+                    <label><input type="checkbox" name="preferences[]" value="fumeur"> Fumeur</label>
+                    <label><input type="checkbox" name="preferences[]" value="animaux"> Animaux</label>
+                    <!-- Ajout dynamique possible -->
+                </div>
+            </div>
+    
+            <button type="submit">Enregistrer</button>
+        </form>
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary">Modifier vos information</button>
+    </div>
+    <div class="text-center pt-3">
+        <a href="/editPassword">Cliquez ici pour modifier votre mot de passe</a>
+    </div>
+</section>
