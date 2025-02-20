@@ -1,0 +1,36 @@
+name: app
+
+type: php:8.3
+
+build:
+    flavor: none
+
+# Static website usually don't require much ressources. See
+# https://symfony.com/doc/current/cloud/cookbooks/resources_allocation.html
+# for more information
+size: XS
+resources:
+    base_memory: 64
+    memory_ratio: 128
+
+disk: 1024
+
+web:
+    commands:
+        start: sleep
+    locations:
+        "/":
+            root: "public"
+            index:
+                - "index.html"
+            scripts: false
+            expires: 10m
+
+crons:
+    security-check:
+        # Check that no security issues have been found for PHP packages deployed in production
+        spec: '50 23 * * *'
+        cmd: if [ "$PLATFORM_ENVIRONMENT_TYPE" = "production" ]; then COMPOSER_ROOT_VERSION=1.0.0 COMPOSER_AUDIT_ABANDONED=ignore composer audit --no-cache; fi
+    clean-expired-sessions:
+        spec: '17,47 * * * *'
+        cmd: [ -x /usr/lib/php/sessionclean ] && /usr/lib/php/sessionclean
