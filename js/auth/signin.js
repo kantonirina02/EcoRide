@@ -1,9 +1,9 @@
 const mailInput = document.getElementById("EmailInput");
 const passwordInput = document.getElementById("PasswordInput");
 
-const btnSingin = document.getElementById("btnSignin");
+const btnSignin = document.getElementById("btnSignin");
 
-btnSingin.addEventListener("click", checkCredentials);
+btnSignin.addEventListener("click", checkCredentials);
 
 function checkCredentials(){
     //Ici, il faudra appeler l'API pour vérifier les credentials en BDD
