@@ -10,7 +10,7 @@ function getRole(){
 
 function signout(){
     eraseCookie(tokenCookieName);
-    eraseCookie("role");
+    eraseCookie(RoleCookieName);
     window.location.reload();
 }
 
@@ -56,12 +56,6 @@ function isConnected(){
     }
 }
 
-if(isConnected()){
-    alert("Vous êtes connecté");
-}
-else{
-    alert("Vous n'êtes pas connecté");
-}
 
 function showAndHideElementsForRoles(){
     const userConnected = isConnected();
@@ -83,6 +77,11 @@ function showAndHideElementsForRoles(){
                 break;
             case 'admin': 
                 if(!userConnected || role != "admin"){
+                    element.classList.add("d-none");
+                }
+                break;
+            case 'employee': 
+                if(!userConnected || role != "employee"){
                     element.classList.add("d-none");
                 }
                 break;
