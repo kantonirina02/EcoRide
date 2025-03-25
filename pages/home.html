@@ -13,9 +13,11 @@
 </div>
 
 <div class="search-bar text-center">
-    <input type="text" placeholder="Départ">
-    <input type="text" placeholder="Arrivée">
-    <label for="date">Date:</label>
-    <input type="date" id="date" title="Select date">
-    <button>Rechercher</button>
+    <form id="rideSearchForm">
+        <input type="text" id="departure" placeholder="Ville de départ" required>
+        <input type="text" id="arrival" placeholder="Ville d'arrivée" required>
+        <label for="date">Date du départ</label>
+        <input type="date" id="date" title="Sélectionnez une date" required>
+        <button type="submit">Rechercher</button>
+    </form>
 </div>
