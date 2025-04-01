@@ -1,0 +1,29 @@
+# Cache et logs Symfony
+/var/
+/var/cache/
+/var/logs/
+/var/sessions/
+
+# Fichiers d'environnement locaux
+/.env.local
+/.env.local.php
+/.env.*.local
+
+# Dépendances installées par Composer
+/vendor/
+
+# Dépendances installées par Node.js (si tu utilises Webpack encore)
+node_modules/
+
+# Fichiers de build front-end (si applicable)
+public/build/
+public/bundles/
+
+# Fichiers temporaires
+/.phpunit.result.cache
+/.idea/  # Pour ceux qui utilisent PHPStorm
+/.vscode/  # Pour ceux qui utilisent VSCode
+
+# Dépendances et fichiers générés par Docker (si applicable)
+docker-compose.override.yml
+/.docker/
