@@ -32,6 +32,9 @@ class Avis
     #[ORM\JoinColumn(nullable: false)]
     private ?Covoiturage $covoiturage = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $statut = null;
+
     public function __construct()
     {
         $this->auteur = new ArrayCollection();
@@ -98,6 +101,18 @@ class Avis
     public function setCovoiturage(?Covoiturage $covoiturage): static
     {
         $this->covoiturage = $covoiturage;
+
+        return $this;
+    }
+
+    public function getStatut(): ?string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): static
+    {
+        $this->statut = $statut;
 
         return $this;
     }

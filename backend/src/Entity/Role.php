@@ -15,7 +15,7 @@ class Role
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50, unique: true)]
     private ?string $libelle = null;
 
     /**
@@ -54,22 +54,27 @@ class Role
         return $this->utilisateurs;
     }
 
-    public function addUtilisateur(Utilisateur $utilisateur): static
+   // public function addUtilisateur(Utilisateur $utilisateur): static
+   // {
+    //    if (!$this->utilisateurs->contains($utilisateur)) {
+    //        $this->utilisateurs->add($utilisateur);
+    //        $utilisateur->addRole($this);
+    //    }
+
+    //    return $this;
+   // }
+
+    //public function removeUtilisateur(Utilisateur $utilisateur): static
+   // {
+   //     if ($this->utilisateurs->removeElement($utilisateur)) {
+     //       $utilisateur->removeRole($this);
+   //     }
+
+   //     return $this;
+   // }
+
+   public function __toString(): string
     {
-        if (!$this->utilisateurs->contains($utilisateur)) {
-            $this->utilisateurs->add($utilisateur);
-            $utilisateur->addRole($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateur(Utilisateur $utilisateur): static
-    {
-        if ($this->utilisateurs->removeElement($utilisateur)) {
-            $utilisateur->removeRole($this);
-        }
-
-        return $this;
+        return $this->libelle ?? 'Nouveau Rôle';
     }
 }
