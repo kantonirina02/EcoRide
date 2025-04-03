@@ -5,7 +5,7 @@ const signoutBtn = document.getElementById("signout-btn");
 signoutBtn.addEventListener("click", signout);
 
 function getRole(){
-    return getCookie(RoleCookieName);
+    return getCookie(RoleCookieName) || 'disconnected';
 }
 
 function signout(){
@@ -29,7 +29,9 @@ function setCookie(name,value,days) {
         date.setTime(date.getTime() + (days*24*60*60*1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    let secureAttribute = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax" + secureAttribute;
+    console.log(`Cookie set: ${name}=${value}`);
 }
 
 function getCookie(name) {
@@ -44,7 +46,9 @@ function getCookie(name) {
 }
 
 function eraseCookie(name) {   
-    document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    console.log(`Erasing cookie: ${name}`);
+    let secureAttribute = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax' + secureAttribute;
 }
 
 function isConnected(){
@@ -59,37 +63,42 @@ function isConnected(){
 
 function showAndHideElementsForRoles(){
     const userConnected = isConnected();
-    const role = getRole();
+    const role = userConnected ? getRole() : 'disconnected';
 
     let allElementsToEdit = document.querySelectorAll('[data-show]');
 
     allElementsToEdit.forEach(element =>{
-        switch(element.dataset.show){
+
+        const showCondition = element.dataset.show;
+        let shouldBeVisible = false;
+
+        switch(showCondition){
             case 'disconnected': 
-                if(userConnected){
-                    element.classList.add("d-none");
-                }
+                shouldBeVisible = !userConnected;
                 break;
             case 'connected': 
-                if(!userConnected){
-                    element.classList.add("d-none");
-                }
+                shouldBeVisible = userConnected;
                 break;
             case 'admin': 
-                if(!userConnected || role != "admin"){
-                    element.classList.add("d-none");
-                }
+                shouldBeVisible = userConnected && role === 'admin';
                 break;
             case 'employee': 
-                if(!userConnected || role != "employee"){
-                    element.classList.add("d-none");
-                }
+            shouldBeVisible = userConnected && (role === 'employee' /*|| role === 'admin'*/);
                 break;
             case 'user': 
-                if(!userConnected || role != "user"){
-                    element.classList.add("d-none");
+            shouldBeVisible = userConnected && (role === 'user' /*|| role === 'employee' || role === 'admin'*/);
+                break;
+            default:
+                const rolesAllowed = showCondition.split(/[\s,]+/);
+                if(userConnected && rolesAllowed.includes(role)){
+                    shouldBeVisible = true;
                 }
                 break;
         }
-    })
+        if (shouldBeVisible) {
+            element.classList.remove('d-none');
+        } else {
+            element.classList.add('d-none');
+        }
+    });
 }

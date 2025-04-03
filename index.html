@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="node_modules/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="scss/main.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <title>Document</title>
+    <title>EcoRide</title>
 </head>
 <body>
     <header>
@@ -20,19 +20,22 @@
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                   <li class="nav-item">
-                    <a class="nav-link" href="/">Accueil</a>
+                    <a class="nav-link" href="/" data-link>Accueil</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="/covoiturages">Covoiturage</a>
+                    <a class="nav-link" href="/covoiturages" data-link>Covoiturage</a>
                   </li>
                   <li class="nav-item" data-show="disconnected">
-                    <a class="nav-link" href="/signin">Connexion</a>
+                    <a class="nav-link" href="/signin" data-link>Connexion</a>
+                  </li>
+                  <li class="nav-item d-none" data-show="disconnected">
+                    <a class="nav-link" href="/signup" data-link>Inscription</a>
                   </li>
                   <li class="nav-item" data-show="connected">
-                    <button class="nav-link" id="signout-btn">Deonnexion</button>
+                    <button class="nav-link" id="signout-btn">Deconnexion</button>
                   </li>
                   <li class="nav-item" data-show="connected">
-                    <a class="nav-link" href="/account">Mon Profil</a>
+                    <a class="nav-link" href="/account" data-link>Mon Profil</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="#">Contact</a>
@@ -48,23 +51,20 @@
         </div>
     </header>
 
-    <main id="main-page">
+    <main id="main-page" class="container mt-4">
         <!-- Contenu de la page -->
     </main>
 
     <footer class=" text-center footer bg-secondary">
-        <div class="row">
-            <div class="">
-                <h5 class="text-white">Contact: contact@ecoride.fr</h5>
-            </div>
-            <div class="mentions-legales p-4">
-                <a href="#" class="text-center text-black">Mentions légales</a>
-            </div>
-        </div>
+      <div class="container">
+        <p class="mb-1">Contact : <a href="mailto:contact@ecoride.fr" class="text-white">contact@ecoride.fr</a></p>
+        <p class="mb-0"><a href="/mentions-legales" data-link class="text-white">Mentions légales</a></p>
+      </div>
     </footer>
 
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
     <script type="module" src="Router/Router.js"></script>
-    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 </html>

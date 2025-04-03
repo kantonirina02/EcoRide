@@ -2,7 +2,7 @@ import Route from "./Route.js";
 
 //Définir ici vos routes
 export const allRoutes = [
-    new Route("/", "Accueil", "/pages/home.html", []),
+    new Route("/", "Accueil", "/pages/home.html", [], "/js/home.js"),
     new Route("/covoiturages","Covoiturages","/pages/covoiturages.html", ["user"]),
     new Route("/signin","Connexion","/pages/signin.html", ["disconnected"], "/js/auth/signin.js"),
     new Route("/signup","Inscription","/pages/signup.html", ["disconnected"], "/js/auth/signup.js"),
