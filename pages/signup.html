@@ -2,14 +2,18 @@
     <div class="text-center">
         <h3>Inscription</h3>
     </div>
-    <form>
-        <div class="mb-3">
-            <label for="PseudoInput" class="form-label">Pseudo</label>
-            <input type="text" class="form-control" id="PseudoInput" placeholder="Votre Pseudo" name="Pseudo"> 
-            <div class="invalid-feedback">
+    <form id="signup-form" novalidate>
+
+      <div id="signup-error" class="alert alert-danger d-none" role="alert"></div>
+      <div id="signup-success" class="alert alert-success d-none" role="alert"></div>
+
+      <div class="mb-3">
+          <label for="PseudoInput" class="form-label">Pseudo</label>
+          <input type="text" class="form-control" id="PseudoInput" placeholder="Votre Pseudo" name="Pseudo" required>
+          <div class="invalid-feedback">
                 Le pseudo est requis.
-            </div>
-        </div>
+          </div>
+      </div>
         <div class="mb-3">
           <label for="EmailInput" class="form-label">Email</label>
           <input type="email" class="form-control" id="EmailInput" placeholder="test@mail.fr" name="Email"> 
@@ -22,9 +26,6 @@
           <input type="password" class="form-control" id="PasswordInput" name="Password">
           <div class="invalid-feedback">
             Votre mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.
-          </div>
-          <div class="valid-feedback">
-            Votre mot de passe est valide.
           </div>
         </div>
         <div class="mb-3">
