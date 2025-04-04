@@ -51,13 +51,9 @@ function eraseCookie(name) {
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax' + secureAttribute;
 }
 
-function isConnected(){
-    if(getToken() == null || getToken == undefined){
-        return false;
-    }
-    else{
-        return true;
-    }
+function isConnected() {
+    // return (getToken() == null || getToken == undefined); // Ancienne version potentiellement problématique
+    return getToken() != null; // Plus simple et sûr
 }
 
 
@@ -102,3 +98,10 @@ function showAndHideElementsForRoles(){
         }
     });
 }
+window.isConnected = isConnected;
+window.getRole = getRole;
+window.showAndHideElementsForRoles = showAndHideElementsForRoles;
+// Optionnel : Exposer setupGlobalEventListeners si besoin de le rappeler
+// window.setupGlobalEventListeners = setupGlobalEventListeners; // (Assurez-vous que la fonction setup existe et contient l'addEventListener pour signoutBtn)
+
+console.log("script.js : Fonctions globales exposées sur window.");
