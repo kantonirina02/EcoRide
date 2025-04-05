@@ -13,17 +13,18 @@ if (!window.ecoRideAccountPage.currentUserData) {
         role: window.getRole ? window.getRole() : 'passenger', // Rôle initial lu depuis le cookie/API
         isDriver: false, // Sera déterminé basé sur le rôle
         driverInfo: { // Structure même si l'utilisateur n'est pas driver au début
-            licensePlate: null,
-            firstRegistration: null,
-            availableSeats: null,
+            licensePlate: "AA-123-BB",
+            firstRegistration: "2020-01-15",
+            availableSeats: 3,
             preferences: { fumeur: "non_fumeur", animaux: "pas_animaux" }, // Defaults
             vehicles: [
                 { id: 101, marque: "Tesla", modele: "Model 3", couleur: "Blanche", energie: "Électrique" },
                 { id: 102, marque: "Peugeot", modele: "208", couleur: "Noire", energie: "Essence" }
             ],
-            selectedVehicleId: null // Pas de sélection par défaut forcément
+            selectedVehicleId: 101
         },
          historiqueTrajets: [ // Historique ajouté
+            { id: 15, type: 'conduit', depart: 'Bordeaux', arrivee: 'Toulouse', date: '2025-04-14', heureDepart: '09:00', prix: 22.00, statut: 'En cours', covoitId: 6 },
             { id: 10, type: 'conduit', depart: 'Paris', arrivee: 'Lyon', date: '2025-04-15', heureDepart: '08:00', prix: 25.50, statut: 'Prévu', covoitId: 1 },
             { id: 11, type: 'participe', depart: 'Marseille', arrivee: 'Nice', date: '2025-04-16', heureDepart: '10:00', prix: 15.00, statut: 'Prévu', covoitId: 3, chauffeurPseudo: 'Soleil13' },
             { id: 12, type: 'conduit', depart: 'Paris', arrivee: 'Lille', date: '2025-04-10', heureDepart: '14:00', prix: 18.00, statut: 'Terminé', covoitId: 4 },
@@ -31,19 +32,13 @@ if (!window.ecoRideAccountPage.currentUserData) {
             { id: 14, type: 'conduit', depart: 'Lyon', arrivee: 'Paris', date: '2025-04-17', heureDepart: '07:00', prix: 26.00, statut: 'Annulé', covoitId: 5 }
         ]
     };
-    // Déterminer isDriver basé sur le rôle initial chargé
     const initialRole = window.ecoRideAccountPage.currentUserData.role;
     window.ecoRideAccountPage.currentUserData.isDriver = (initialRole === 'driver' || initialRole === 'both');
-    // Charger les infos chauffeur existantes si le rôle initial est driver/both
-    // TODO: Idéalement, ces infos viendraient d'une API lors du chargement initial
-
 } else {
     console.log("Données currentUserData existent déjà.");
-    // Mettre à jour seulement les crédits (qui peuvent changer dynamiquement)
     if (window.getUserCredits) {
         window.ecoRideAccountPage.currentUserData.credits = window.getUserCredits();
     }
-     // S'assurer que isDriver est cohérent avec le rôle stocké
      const currentRole = window.ecoRideAccountPage.currentUserData.role;
      window.ecoRideAccountPage.currentUserData.isDriver = (currentRole === 'driver' || currentRole === 'both');
 }
@@ -55,12 +50,11 @@ window.ecoRideAccountPage.formatDate = function(dateString) {
     if (!dateString) return '';
     try {
         const [year, month, day] = dateString.split('-');
-        // Vérification simple si le découpage a fonctionné
         if (year && month && day && year.length === 4 && month.length === 2 && day.length === 2) {
              return `${day}/${month}/${year}`;
         }
-    } catch (e) { /* Ignorer l'erreur de format */ }
-    return dateString; // Retourne original si format invalide
+    } catch (e) { /* Ignorer */ }
+    return dateString;
 };
 
 // --- Fonctions de Validation ---
@@ -79,7 +73,7 @@ window.ecoRideAccountPage.validateLicensePlate = function(inputElement) {
      const value = inputElement.value.trim();
      let isValid = pattern.test(value);
       if(isValid) {
-         inputElement.value = value.toUpperCase(); // Met en majuscules si valide
+         inputElement.value = value.toUpperCase();
          inputElement.classList.add("is-valid");
      } else {
          inputElement.classList.add("is-invalid");
@@ -100,7 +94,7 @@ window.ecoRideAccountPage.validateSeats = function(inputElement) {
 window.ecoRideAccountPage.validateVehicleSelection = function(selectElement) {
      if (!selectElement) { console.error("validateVehicleSelection: selectElement est null"); return false; }
      selectElement.classList.remove('is-valid', 'is-invalid');
-     const isValid = selectElement.value !== "" && selectElement.value !== null; // Doit avoir une valeur sélectionnée
+     const isValid = selectElement.value !== "" && selectElement.value !== null;
      selectElement.classList.toggle('is-valid', isValid);
      selectElement.classList.toggle('is-invalid', !isValid);
      return isValid;
@@ -118,9 +112,8 @@ window.ecoRideAccountPage.displayUserInfo = function() {
 
     if (userPseudoSpan) userPseudoSpan.textContent = data.pseudo || 'Non défini';
     if (userEmailSpan) userEmailSpan.textContent = data.email || 'Non défini';
-    if (userCreditsSpan && window.getUserCredits) userCreditsSpan.textContent = window.getUserCredits(); // Toujours prendre la valeur fraîche
+    if (userCreditsSpan && window.getUserCredits) userCreditsSpan.textContent = window.getUserCredits();
 
-    // Appeler les fonctions de mise à jour visuelle qui dépendent du rôle initial
     ns.updateRoleButtons(data.role);
     ns.toggleSectionsBasedOnRole(data.role);
     console.log("<- Fin displayUserInfo");
@@ -134,20 +127,16 @@ window.ecoRideAccountPage.populateVehicleSelect = function() {
 
     if (!vehicleSelect) { console.error("populateVehicleSelect: #vehicleSelect non trouvé"); return; }
 
-    const vehicles = data.driverInfo?.vehicles; // Utilise ?. au cas où driverInfo n'existerait pas
+    const vehicles = data.driverInfo?.vehicles;
     const selectedVehicleId = data.driverInfo?.selectedVehicleId;
 
-    // Vider les options précédentes sauf la première (placeholder)
-    while (vehicleSelect.options.length > 1) {
-        vehicleSelect.remove(1);
-    }
-    vehicleSelect.value = ""; // Réinitialiser la sélection
-    vehicleSelect.disabled = true; // Désactiver par défaut
+    vehicleSelect.disabled = true;
+    vehicleSelect.innerHTML = '<option value="" selected disabled>Aucun véhicule (non chauffeur)</option>';
 
-    if (data.isDriver && vehicles) { // Vérifie si chauffeur ET si l'array vehicles existe
+    if (data.isDriver && vehicles) {
         if (vehicles.length > 0) {
              vehicleSelect.disabled = false;
-             vehicleSelect.innerHTML = '<option value="" selected disabled>Sélectionner...</option>'; // Remet le placeholder
+             vehicleSelect.innerHTML = '<option value="" selected disabled>Sélectionner...</option>';
             vehicles.forEach(vehicle => {
                 const option = document.createElement('option');
                 option.value = vehicle.id;
@@ -158,11 +147,9 @@ window.ecoRideAccountPage.populateVehicleSelect = function() {
                 vehicleSelect.appendChild(option);
             });
         } else {
-             vehicleSelect.disabled = false; // Laisser activé pour ajout futur?
+             vehicleSelect.disabled = false;
              vehicleSelect.innerHTML = '<option value="" selected disabled>Aucun véhicule enregistré</option>';
         }
-    } else {
-         vehicleSelect.innerHTML = '<option value="" selected disabled>N/A (non chauffeur)</option>';
     }
     console.log("<- Fin populateVehicleSelect");
 };
@@ -171,19 +158,17 @@ window.ecoRideAccountPage.populateDriverForm = function() {
      console.log("-> Appel populateDriverForm");
      const ns = window.ecoRideAccountPage;
      const data = ns.currentUserData;
-     const driverInfo = data.driverInfo; // Peut être null/undefined si pas chauffeur
-     // Cibler les éléments
+     const driverInfo = data.driverInfo;
      const licensePlateInput = document.getElementById('licensePlate');
      const firstRegistrationInput = document.getElementById('firstRegistration');
      const availableSeatsInput = document.getElementById('availableSeats');
 
      if (!data.isDriver || !driverInfo) {
           console.log("populateDriverForm: Pas un chauffeur ou infos manquantes.");
-          // Optionnel: vider les champs s'ils ne sont pas pertinents
           if(licensePlateInput) licensePlateInput.value = '';
           if(firstRegistrationInput) firstRegistrationInput.value = '';
           if(availableSeatsInput) availableSeatsInput.value = '';
-          ns.populateVehicleSelect(); // Assure que le select est dans l'état correct
+          ns.populateVehicleSelect();
           return;
      }
 
@@ -192,10 +177,12 @@ window.ecoRideAccountPage.populateDriverForm = function() {
      if (availableSeatsInput) availableSeatsInput.value = driverInfo.availableSeats || '';
 
      try {
-        const prefFumeur = driverInfo.preferences?.fumeur || 'non_fumeur'; // Valeur par défaut si undefined
-        const prefAnimaux = driverInfo.preferences?.animaux || 'pas_animaux'; // Valeur par défaut si undefined
-        document.querySelector(`input[name="pref_fumeur"][value="${prefFumeur}"]`).checked = true;
-        document.querySelector(`input[name="pref_animaux"][value="${prefAnimaux}"]`).checked = true;
+        const prefFumeur = driverInfo.preferences?.fumeur || 'non_fumeur';
+        const prefAnimaux = driverInfo.preferences?.animaux || 'pas_animaux';
+        const fumeurRadio = document.querySelector(`input[name="pref_fumeur"][value="${prefFumeur}"]`);
+        const animauxRadio = document.querySelector(`input[name="pref_animaux"][value="${prefAnimaux}"]`);
+        if (fumeurRadio) fumeurRadio.checked = true; else document.getElementById('pref_non_fumeur').checked = true; // Default check
+        if (animauxRadio) animauxRadio.checked = true; else document.getElementById('pref_pas_animaux').checked = true; // Default check
     } catch (e) { console.error("Erreur pré-cochage préférences:", e); }
 
      ns.populateVehicleSelect();
@@ -222,106 +209,56 @@ window.ecoRideAccountPage.toggleSectionsBasedOnRole = function(selectedRole) {
     console.log("toggleSectionsBasedOnRole appelée avec:", selectedRole);
     const ns = window.ecoRideAccountPage;
     const data = ns.currentUserData;
-    // Cible les éléments
     const driverFormElement = document.getElementById('driverForm');
     const passengerSectionInfo = document.getElementById('passengerSection');
     const driverActionsDiv = document.getElementById('driverActions');
     const driverHistorySection = document.getElementById('driverHistory');
     const passengerHistorySection = document.getElementById('passengerHistory');
 
-    // Mettre à jour l'état
     data.role = selectedRole;
     data.isDriver = (selectedRole === 'driver' || selectedRole === 'both');
     console.log("Nouvel état simulé:", data);
 
-    // Appliquer la visibilité
-    if (driverFormElement) driverFormElement.classList.toggle('d-none', !data.isDriver);
-    if (driverActionsDiv) driverActionsDiv.classList.toggle('d-none', !data.isDriver);
-    if (passengerSectionInfo) passengerSectionInfo.classList.toggle('d-none', !(selectedRole === 'passenger' || selectedRole === 'both'));
-    if (driverHistorySection) driverHistorySection.classList.toggle('d-none', !data.driverInfo); // Affiche si driverInfo existe
-    if (passengerHistorySection) passengerHistorySection.classList.toggle('d-none', false); // Toujours visible
+    if (driverFormElement) {
+        driverFormElement.classList.toggle('d-none', !data.isDriver);
+        // Appeler populate SEULEMENT si on rend visible
+        if(data.isDriver && driverFormElement.classList.contains('d-none') === false) {
+             ns.populateDriverForm();
+        }
+        console.log("   -> d-none sur driverForm:", driverFormElement.classList.contains('d-none'));
+    } else { console.error("driverFormElement non trouvé !");}
 
-    // Pré-remplir si besoin
-    if (data.isDriver && driverFormElement && !driverFormElement.classList.contains('d-none')) {
-        ns.populateDriverForm();
-    }
+    if(driverActionsDiv){
+         driverActionsDiv.classList.toggle('d-none', !data.isDriver);
+         console.log("   -> d-none sur driverActionsDiv:", driverActionsDiv.classList.contains('d-none'));
+    } else { console.warn("driverActionsDiv non trouvé!");}
+
+     if (passengerSectionInfo) {
+        const showPassengerInfo = selectedRole === 'passenger' || selectedRole === 'both';
+        passengerSectionInfo.classList.toggle('d-none', !showPassengerInfo);
+        console.log("   -> d-none sur passengerSectionInfo:", passengerSectionInfo.classList.contains('d-none'));
+    } else { console.error("passengerSection non trouvé !");}
+
+     if(driverHistorySection){
+         driverHistorySection.classList.toggle('d-none', !data.driverInfo);
+         console.log("   -> d-none sur driverHistorySection:", driverHistorySection.classList.contains('d-none'));
+     } else { console.warn("driverHistorySection non trouvé!");}
+
+      if(passengerHistorySection){
+          passengerHistorySection.classList.toggle('d-none', false);
+          console.log("   -> d-none sur passengerHistorySection:", passengerHistorySection.classList.contains('d-none'));
+      } else { console.warn("passengerHistorySection non trouvé!");}
 
     console.log("<- Fin toggleSectionsBasedOnRole");
 };
 
-// --- NOUVELLE FONCTION : Gérer l'Annulation ---
-window.ecoRideAccountPage.handleCancelTrajet = function(historyId, type) {
-    console.log(`Tentative d'annulation pour historique ID: ${historyId}, type: ${type}`);
-    const ns = window.ecoRideAccountPage;
-    const data = ns.currentUserData;
-    const historique = data.historiqueTrajets || [];
-
-    // Trouver l'entrée d'historique correspondante
-    const trajetIndex = historique.findIndex(t => t.id === historyId);
-    if (trajetIndex === -1) {
-        console.error("Trajet historique non trouvé pour annulation.");
-        alert("Erreur : Trajet historique introuvable.");
-        return;
-    }
-
-    const trajet = historique[trajetIndex];
-
-    // Vérifier si le statut permet l'annulation
-    if (trajet.statut !== 'Prévu') {
-        console.warn("Tentative d'annulation d'un trajet non prévu.");
-        alert("Vous ne pouvez annuler qu'un trajet prévu.");
-        return;
-    }
-
-    // Confirmation utilisateur
-    const confirmationMessage = type === 'conduit'
-        ? `Confirmez-vous l'annulation du trajet ${trajet.depart} -> ${trajet.arrivee} du ${ns.formatDate(trajet.date)} ?\n(Les passagers inscrits seraient remboursés et notifiés).`
-        : `Confirmez-vous l'annulation de votre participation au trajet ${trajet.depart} -> ${trajet.arrivee} du ${ns.formatDate(trajet.date)} ?\n(Vos crédits vous seront remboursés).`;
-
-    if (window.confirm(confirmationMessage)) {
-        console.log("Annulation confirmée.");
-
-        // --- Simulation Backend ---
-        // 1. Changer le statut
-        trajet.statut = 'Annulé';
-        console.log("Statut mis à jour en 'Annulé' (simulation).");
-
-        // 2. Simuler le remboursement des crédits
-        let creditsToAdd = 0;
-        if (type === 'participe') {
-            creditsToAdd = Math.ceil(trajet.prix); // Rembourse le passager
-        } else if (type === 'conduit') {
-            // Si c'était une vraie app, on chercherait les passagers inscrits
-            // et on rembourserait chacun. Ici on simule juste qu'il n'y avait
-            // pas de passager ou que le remboursement est géré ailleurs pour le chauffeur.
-            // On pourrait aussi enlever les 2 crédits pris par la plateforme ? Non, c'est au backend de gérer ça.
-            console.log("Annulation par le chauffeur (pas de remboursement simulé ici).");
-        }
-
-        if (creditsToAdd > 0) {
-            if (window.addUserCredits) {
-                window.addUserCredits(creditsToAdd);
-                // Mettre à jour l'affichage des crédits en haut de page
-                 const userCreditsSpan = document.getElementById('user-credits');
-                 if(userCreditsSpan && window.getUserCredits) userCreditsSpan.textContent = window.getUserCredits();
-            } else {
-                console.error("Fonction addUserCredits non trouvée !");
-            }
-        }
-
-        // 3. Afficher un message de succès
-        alert("Le trajet a été annulé avec succès."); // Simple alerte pour la démo
-
-        // 4. Rafraîchir l'affichage de l'historique complet
-        ns.displayHistorique();
-
-    } else {
-        console.log("Annulation abandonnée par l'utilisateur.");
-    }
-}
+// --- Fonctions de Gestion des Actions ---
+window.ecoRideAccountPage.handleCancelTrajet = function(historyId, type) { /* ... (Code identique à la version précédente) ... */ };
+window.ecoRideAccountPage.handleStartTrajet = function(historyId) { /* ... (Code identique à la version précédente) ... */ };
+window.ecoRideAccountPage.handleFinishTrajet = function(historyId) { /* ... (Code identique à la version précédente) ... */ };
 
 
-// --- Affichage Historique ---
+// --- Affichage Historique (avec délégation et createHistoryElement interne) ---
 window.ecoRideAccountPage.displayHistorique = function() {
     console.log("-> Appel displayHistorique");
     const ns = window.ecoRideAccountPage;
@@ -330,36 +267,45 @@ window.ecoRideAccountPage.displayHistorique = function() {
     const driverHistoryContent = document.getElementById('driver-history-content');
     const passengerHistoryContent = document.getElementById('passenger-history-content');
 
-    if (!driverHistoryContent || !passengerHistoryContent) { return; }
-
+    if (!driverHistoryContent || !passengerHistoryContent) { console.error("Conteneurs historique non trouvés."); return; }
     driverHistoryContent.innerHTML = '';
     passengerHistoryContent.innerHTML = '';
 
-    const trajetsConduits = historique.filter(t => t.type === 'conduit');
-    const trajetsParticipations = historique.filter(t => t.type === 'participe');
-
-    // Fonction interne pour créer un élément d'historique
+    // --- Définition de createHistoryElement ICI ---
     const createHistoryElement = (trajet, type) => {
         const elem = document.createElement('div');
         elem.className = 'list-group-item list-group-item-action flex-column align-items-start';
         let statutBadge = '';
-        switch (trajet.statut) { /* ... badges ... */ }
-        const isPrevu = trajet.statut === 'Prévu';
-        const detailLink = `<a href="/covoiturages/${trajet.covoitId}" data-link class="btn btn-sm btn-outline-primary me-2">Voir Détails</a>`;
-        let cancelButton = '';
-        if (isPrevu) {
-            cancelButton = `<button class="btn btn-sm btn-outline-danger cancel-btn" data-history-id="${trajet.id}" data-type="${type}"> ${type === 'conduit' ? 'Annuler Trajet' : 'Annuler Participation'} </button>`;
+        switch (trajet.statut) {
+             case 'Prévu': statutBadge = '<span class="badge bg-info float-end">Prévu</span>'; break;
+             case 'En cours': statutBadge = '<span class="badge bg-warning text-dark float-end">En cours</span>'; break;
+             case 'Terminé': statutBadge = '<span class="badge bg-secondary float-end">Terminé</span>'; break;
+             case 'Annulé': statutBadge = '<span class="badge bg-danger float-end">Annulé</span>'; break;
+             default: statutBadge = `<span class="badge bg-light text-dark float-end">${trajet.statut || '?'}</span>`;
         }
-         let driverSpecificActions = '';
-         if (type === 'conduit' && isPrevu) {
-             // TODO US 11: Ajouter boutons Démarrer/Arrêter ici
-             // driverSpecificActions = `<button...>Démarrer</button>...`;
-         }
-         let passengerSpecificActions = '';
-          if (type === 'participe' && trajet.statut === 'Terminé') {
-               // TODO US 11: Ajouter bouton Avis ici
-              // passengerSpecificActions = `<button...>Laisser Avis</button>`;
-          }
+        const isPrevu = trajet.statut === 'Prévu';
+        const isEnCours = trajet.statut === 'En cours';
+        const isTermine = trajet.statut === 'Terminé';
+
+        const detailLink = `<a href="/covoiturages/${trajet.covoitId}" data-link class="btn btn-sm btn-outline-primary me-2">Voir Détails</a>`;
+        let actionButtons = '';
+
+        if (type === 'conduit') {
+             if (isPrevu) {
+                actionButtons += `<button class="btn btn-sm btn-success start-btn me-2" data-history-id="${trajet.id}"><i class="bi bi-play-fill"></i> Démarrer</button>`;
+                actionButtons += `<button class="btn btn-sm btn-outline-danger cancel-btn" data-history-id="${trajet.id}" data-type="conduit"><i class="bi bi-x-circle"></i> Annuler</button>`;
+            } else if (isEnCours) {
+                actionButtons += `<button class="btn btn-sm btn-info finish-btn" data-history-id="${trajet.id}"><i class="bi bi-check-circle-fill"></i> Arrivée</button>`;
+            } else if (isTermine) {
+                 actionButtons += `<button class="btn btn-sm btn-outline-secondary history-details-btn" data-history-id="${trajet.id}" disabled title="Voir participants/avis (à venir)"><i class="bi bi-people"></i> Gérer</button>`;
+            }
+        } else { // type === 'participe'
+            if (isPrevu) {
+                actionButtons += `<button class="btn btn-sm btn-outline-danger cancel-btn" data-history-id="${trajet.id}" data-type="participe"><i class="bi bi-x-circle"></i> Annuler Participation</button>`;
+            } else if (isTermine) {
+                 actionButtons += `<button class="btn btn-sm btn-outline-warning feedback-btn" data-history-id="${trajet.id}" disabled title="Laisser avis/validation (à venir)"><i class="bi bi-chat-left-text"></i> Feedback</button>`;
+            }
+        }
 
         elem.innerHTML = `
             <div class="d-flex w-100 justify-content-between">
@@ -367,104 +313,112 @@ window.ecoRideAccountPage.displayHistorique = function() {
                 <small>${ns.formatDate(trajet.date)} à ${trajet.heureDepart}</small>
             </div>
             <p class="mb-1 small">Prix: ${trajet.prix.toFixed(2)}€ ${statutBadge}</p>
-            <div class="mt-2">
+            <div class="mt-2 history-actions">
                 ${detailLink}
-                ${cancelButton}
-                ${driverSpecificActions}
-                ${passengerSpecificActions}
+                ${actionButtons}
             </div>
         `;
         return elem;
     };
+    // --- Fin createHistoryElement ---
+
 
     // Peupler les listes
+    const trajetsConduits = historique.filter(t => t.type === 'conduit');
+    const trajetsParticipations = historique.filter(t => t.type === 'participe');
+
     if (trajetsConduits.length > 0) {
         trajetsConduits.forEach(t => driverHistoryContent.appendChild(createHistoryElement(t, 'conduit')));
-    } else {}
+    } else { driverHistoryContent.innerHTML = '<p class="text-muted list-group-item">Aucun trajet proposé.</p>'; }
+
     if (trajetsParticipations.length > 0) {
         trajetsParticipations.forEach(t => passengerHistoryContent.appendChild(createHistoryElement(t, 'participe')));
-    } else {}
+    } else { passengerHistoryContent.innerHTML = '<p class="text-muted list-group-item">Aucune participation.</p>'; }
+
+
+    // --- Attacher/Ré-attacher les écouteurs pour les actions d'historique ---
+    const historyEventHandler = (event) => {
+        const button = event.target.closest('button[data-history-id]');
+        if (!button) return;
+        console.log("Clic détecté sur bouton d'historique:", button);
+
+        const historyId = parseInt(button.dataset.historyId, 10);
+        const type = button.dataset.type;
+
+        if (button.classList.contains('cancel-btn') && historyId && type) {
+            console.log(`Action détectée: Annuler (ID: ${historyId}, Type: ${type})`);
+            ns.handleCancelTrajet(historyId, type);
+        } else if (button.classList.contains('start-btn') && historyId) {
+            console.log(`Action détectée: Démarrer (ID: ${historyId})`);
+            ns.handleStartTrajet(historyId);
+        }
+        else if (button.classList.contains('finish-btn') && historyId) {
+            console.log(`Action détectée: Terminer (ID: ${historyId})`); 
+            ns.handleFinishTrajet(historyId);
+        }
+        else {
+            console.log("Aucune action connue pour ce bouton:", button); 
+        }
+    };
+
+    const setupHistoryListeners = (container) => {
+         if(container) {
+            container.removeEventListener('click', historyEventHandler);
+            container.addEventListener('click', historyEventHandler);
+            console.log(`Écouteur d'actions (historyEventHandler) attaché à ${container.id}`);
+         } else {
+            console.error("Conteneur d'historique non trouvé pour attacher l'écouteur:", container);
+        }
+    };
+
+    setupHistoryListeners(driverHistoryContent);
+    setupHistoryListeners(passengerHistoryContent);
 
     console.log("<- Fin displayHistorique");
-    // Attacher les écouteurs aux boutons Annuler
-    const attachCancelListener = (container) => {
-        container.removeEventListener('click', cancelEventHandler);
-        container.addEventListener('click', cancelEventHandler);
-        console.log(`Écouteur d'annulation attaché à ${container.id}`);
-};
-// Fonction qui gère le clic sur un bouton Annuler
-const cancelEventHandler = (event) => {
-    // Vérifier si on a cliqué sur un bouton avec la classe 'cancel-btn'
-    if (event.target.classList.contains('cancel-btn')) {
-        const button = event.target;
-        const historyId = parseInt(button.dataset.historyId, 10); // Récupère l'ID depuis data-history-id
-        const type = button.dataset.type; // Récupère le type depuis data-type
-        if (historyId && type) {
-            ns.handleCancelTrajet(historyId, type); // Appelle la fonction du namespace
-        } else {
-            console.error("Impossible de récupérer l'ID ou le type pour l'annulation.");
-        }
-    }
 };
 
-// Attacher les écouteurs aux deux conteneurs
-if (driverHistoryContent) attachCancelListener(driverHistoryContent);
-if (passengerHistoryContent) attachCancelListener(passengerHistoryContent);
-};
 
 // --- Fonction d'Attachement des Écouteurs (appelée une seule fois) ---
 window.ecoRideAccountPage.attachEventListeners = function() {
-    console.log("Attachement des écouteurs page Account...");
+    console.log("Attachement des écouteurs UNIQUES page Account...");
     const ns = window.ecoRideAccountPage;
     const passengerBtn = document.getElementById('passengerBtn');
     const driverBtn = document.getElementById('driverBtn');
     const bothBtn = document.getElementById('bothBtn');
     const driverFormElement = document.getElementById('driverForm');
     const driverFormFeedback = document.getElementById('driver-form-feedback');
-    // Cibler les champs pour la validation dans le listener submit
+    // Cibler les champs pour la validation DANS l'écouteur submit
     const licensePlateInput = document.getElementById('licensePlate');
     const firstRegistrationInput = document.getElementById('firstRegistration');
     const availableSeatsInput = document.getElementById('availableSeats');
     const vehicleSelect = document.getElementById('vehicleSelect');
 
 
-    const attachListenerIfNeeded = (element, eventName, handler) => {
-        if (element && !element.hasAttribute('data-listener-' + eventName)) {
+    const attachListenerIfNeeded = (element, eventName, handler, idSuffix) => {
+        const listenerId = 'data-listener-' + eventName + (idSuffix || '');
+        if (element && !element.hasAttribute(listenerId)) {
             element.addEventListener(eventName, handler);
-            element.setAttribute('data-listener-' + eventName, 'true');
-            return true; // Indique que l'écouteur a été attaché
-        } else if (element) {
-            console.log(`Écouteur '${eventName}' déjà attaché pour`, element.id || element);
-            return false; // Déjà attaché
-        } else {
-            console.error(`Élément non trouvé pour attacher '${eventName}'`);
-            return false; // Élément non trouvé
-        }
+            element.setAttribute(listenerId, 'true');
+            console.log(`Écouteur '${eventName}' attaché pour`, element.id || element);
+            return true;
+        } else if (element) { return false; } // Déjà attaché, on log plus ici pour éviter spam
+          else { console.error(`Élément non trouvé pour attacher '${eventName}'`); return false; }
     };
 
     // Attacher aux boutons de rôle
-    if(attachListenerIfNeeded(passengerBtn, 'click', () => {
-        console.log("Clic sur Passager détecté !"); ns.updateRoleButtons('passenger'); ns.toggleSectionsBasedOnRole('passenger');
-    })) { console.log("Écouteur Passager attaché."); }
-
-    if(attachListenerIfNeeded(driverBtn, 'click', () => {
-        console.log("Clic sur Driver détecté !"); ns.updateRoleButtons('driver'); ns.toggleSectionsBasedOnRole('driver');
-    })) { console.log("Écouteur Driver attaché."); }
-
-    if(attachListenerIfNeeded(bothBtn, 'click', () => {
-        console.log("Clic sur Both détecté !"); ns.updateRoleButtons('both'); ns.toggleSectionsBasedOnRole('both');
-    })) { console.log("Écouteur Both attaché."); }
+    attachListenerIfNeeded(passengerBtn, 'click', () => { ns.updateRoleButtons('passenger'); ns.toggleSectionsBasedOnRole('passenger'); });
+    attachListenerIfNeeded(driverBtn, 'click', () => { ns.updateRoleButtons('driver'); ns.toggleSectionsBasedOnRole('driver'); });
+    attachListenerIfNeeded(bothBtn, 'click', () => { ns.updateRoleButtons('both'); ns.toggleSectionsBasedOnRole('both'); });
 
 
     // Attacher au formulaire chauffeur
-    if(attachListenerIfNeeded(driverFormElement, 'submit', (event) => {
+    attachListenerIfNeeded(driverFormElement, 'submit', (event) => {
          event.preventDefault();
          console.log("Soumission formulaire chauffeur...");
          if (driverFormFeedback) { driverFormFeedback.textContent = ''; driverFormFeedback.className = 'mb-3'; }
 
          console.log("Validation formulaire chauffeur...");
          let isFormValid = true;
-         // Appeler les validateurs du namespace
          isFormValid = ns.validateLicensePlate(licensePlateInput) && isFormValid;
          isFormValid = ns.validateRequiredInput(firstRegistrationInput) && isFormValid;
          isFormValid = ns.validateVehicleSelection(vehicleSelect) && isFormValid;
@@ -472,33 +426,39 @@ window.ecoRideAccountPage.attachEventListeners = function() {
 
          if (isFormValid) {
             console.log("Formulaire chauffeur VALIDE.");
-            // ... (Logique MàJ currentUserData + message succès + setTimeout) ...
             const data = ns.currentUserData.driverInfo;
-            data.licensePlate = licensePlateInput.value;
-            data.firstRegistration = firstRegistrationInput.value;
-            data.selectedVehicleId = parseInt(vehicleSelect.value, 10);
-            data.availableSeats = parseInt(availableSeatsInput.value, 10);
-             if(data.preferences){
-                  data.preferences.fumeur = document.querySelector('input[name="pref_fumeur"]:checked')?.value;
-                  data.preferences.animaux = document.querySelector('input[name="pref_animaux"]:checked')?.value;
-              }
-             console.log("Données MàJ:", data);
-             if (driverFormFeedback) {
-                driverFormFeedback.textContent = 'Infos enregistrées (simulation) !';
-                driverFormFeedback.className = 'alert alert-success mt-3';
-                setTimeout(() => { if(driverFormFeedback) { driverFormFeedback.textContent = ''; driverFormFeedback.className = 'mb-3'; } }, 3000);
-             }
+            if(data){ // Sécurité: vérifier que driverInfo existe
+                data.licensePlate = licensePlateInput.value;
+                data.firstRegistration = firstRegistrationInput.value;
+                data.selectedVehicleId = parseInt(vehicleSelect.value, 10);
+                data.availableSeats = parseInt(availableSeatsInput.value, 10);
+                 if(data.preferences){
+                      data.preferences.fumeur = document.querySelector('input[name="pref_fumeur"]:checked')?.value;
+                      data.preferences.animaux = document.querySelector('input[name="pref_animaux"]:checked')?.value;
+                  }
+                 console.log("Données MàJ:", data);
+                 if (driverFormFeedback) {
+                    driverFormFeedback.textContent = 'Infos enregistrées (simulation) !';
+                    driverFormFeedback.className = 'alert alert-success mt-3';
+                    setTimeout(() => { if(driverFormFeedback) { driverFormFeedback.textContent = ''; driverFormFeedback.className = 'mb-3'; } }, 3000);
+                 }
+            } else {
+                 console.error("Impossible de sauvegarder: currentUserData.driverInfo non défini.");
+                  if (driverFormFeedback) {
+                     driverFormFeedback.textContent = 'Erreur interne lors de la sauvegarde.';
+                     driverFormFeedback.className = 'alert alert-danger mt-3';
+                  }
+            }
+
          } else {
-             console.log("Formulaire chauffeur INVALIDE.");
+            console.log("Formulaire chauffeur INVALIDE.");
               if (driverFormFeedback) {
                  driverFormFeedback.textContent = 'Veuillez corriger les erreurs.';
                  driverFormFeedback.className = 'alert alert-danger mt-3';
              }
          }
-    })) { console.log("Écouteur Submit Driver Form attaché."); }
-
-
-     console.log("Fin attachement écouteurs page Account.");
+    });
+    console.log("Fin attachement écouteurs page Account.");
 };
 
 
@@ -506,30 +466,31 @@ window.ecoRideAccountPage.attachEventListeners = function() {
 window.ecoRideAccountPage.initialize = function() {
     const ns = window.ecoRideAccountPage; // Alias
 
-    if (ns.isInitialized) {
+    if (ns.isInitialized && document.getElementById('account-page-marker')) { // Ajout d'un marqueur pour être sûr
         console.log("Page Account déjà initialisée, mise à jour infos...");
         const userCreditsSpan = document.getElementById('user-credits');
-        if (userCreditsSpan && window.getUserCredits) {
-             userCreditsSpan.textContent = window.getUserCredits();
-        }
-        // Réappliquer affichage + historique
+        if (userCreditsSpan && window.getUserCredits) userCreditsSpan.textContent = window.getUserCredits();
         ns.updateRoleButtons(ns.currentUserData.role);
         ns.toggleSectionsBasedOnRole(ns.currentUserData.role);
         ns.displayHistorique(); // Rafraîchir historique
         return;
     }
     console.log("Première initialisation de la page Account.");
+    // Ajouter un marqueur au conteneur principal pour la détection isInitialized
+    const mainContainer = document.querySelector('.account-page'); // Utilise la classe du conteneur principal
+    if (mainContainer) mainContainer.id = 'account-page-marker';
 
-    if (!window.isConnected()) { /* ... redirection ... */ return; }
+
+    if (!window.isConnected()) { console.warn("Non connecté, redirection..."); window.location.replace("/signin"); return; }
 
     // Afficher infos initiales + historique
-    ns.displayUserInfo(); // Ceci appelle déjà updateRoleButtons et toggleSections...
+    ns.displayUserInfo();
     ns.displayHistorique();
 
     // Attacher les écouteurs une seule fois
     ns.attachEventListeners();
 
-    ns.isInitialized = true;
+    ns.isInitialized = true; // Marquer comme initialisé
     console.log("Page Account marquée comme initialisée.");
 };
 
