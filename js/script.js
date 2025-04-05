@@ -91,6 +91,16 @@ function setUserCredits(newCreditAmount) {
  * @param {number} amountToDeduct - Le nombre de crédits à déduire.
  * @returns {boolean} True si la déduction a réussi, False sinon (crédits insuffisants).
  */
+function addUserCredits(amountToAdd) {
+    const currentCredits = getUserCredits();
+    if (typeof amountToAdd === 'number' && amountToAdd > 0) {
+        setUserCredits(currentCredits + amountToAdd); // setUserCredits gère le floor et >= 0
+        console.log(`Simulation: ${amountToAdd} crédits ajoutés.`);
+        return true; // Succès
+    }
+    console.error(`Tentative d'ajout de crédits invalide: ${amountToAdd}`);
+    return false; // Échec
+}
 function deductUserCredits(amountToDeduct) {
     const currentCredits = getUserCredits();
     if (typeof amountToDeduct === 'number' && amountToDeduct > 0 && currentCredits >= amountToDeduct) {
@@ -175,5 +185,6 @@ window.getRole = getRole;
 window.showAndHideElementsForRoles = showAndHideElementsForRoles;
 window.getUserCredits = getUserCredits;
 window.deductUserCredits = deductUserCredits;
+window.addUserCredits = addUserCredits;
 
 console.log("script.js : Fonctions globales exposées sur window.");

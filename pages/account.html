@@ -1,61 +1,133 @@
-<section class="text-center">
-    <div class="role-section">
-        <h2>Mon Profil</h2>
-        
-        <div class="role-options">
-            <button class="role-btn" data-role="driver" id="driverBtn">Chauffeur</button>
-            <button class="role-btn" data-role="passenger" id="passengerBtn">Passager</button>
-            <button class="role-btn" data-role="both" id="bothBtn">Les deux</button>
+<section class="account-page container py-4">
+    <h1 class="text-center mb-4">Mon Espace Profil</h1>
+    <div class="user-info mb-4 p-3 bg-light rounded">
+        <h4>Vos Informations</h4>
+        <p><strong>Pseudo :</strong> <span id="user-pseudo">Chargement...</span></p>
+        <p><strong>Email :</strong> <span id="user-email">Chargement...</span></p>
+        <p><strong>Crédits :</strong> <span id="user-credits">Chargement...</span></p>
+        {# Le bouton pour modifier ces infos (non fonctionnel ici) #}
+        <button class="btn btn-sm btn-outline-secondary" id="editInfoBtn" disabled>Modifier mes informations (non implémenté)</button>
+         <a href="/editPassword" data-link class="btn btn-sm btn-outline-warning ms-2">Modifier mon mot de passe</a>
+    </div>
+
+    <section id="historySection" class="history-section mb-4">
+        <h2 class="mb-3">Historique des Trajets</h2>
+
+        {# --- Historique Conducteur (initialement caché) --- #}
+        <div id="driverHistory" class="history-list d-none mb-4">
+            <h4>Mes Trajets Proposés</h4>
+            <div id="driver-history-content" class="list-group">
+                <!-- Contenu injecté par JS -->
+                <p class="text-muted list-group-item">Aucun trajet proposé pour le moment.</p>
+            </div>
         </div>
 
+        {# --- Historique Passager (initialement caché) --- #}
+        <div id="passengerHistory" class="history-list d-none mb-4">
+             <h4>Mes Participations</h4>
+             <div id="passenger-history-content" class="list-group">
+                 <!-- Contenu injecté par JS -->
+                 <p class="text-muted list-group-item">Aucune participation pour le moment.</p>
+             </div>
+        </div>
+    </section>
     
-        <!-- Formulaire chauffeur -->
-        <form id="driverForm" class="driver-form hidden">
-
-            <h3>Informations Chauffeur</h3>
-            
-            <div class="form-group">
-                <label for="licensePlate">Plaque d'immatriculation</label>
-                <input type="text" id="licensePlate" name="licensePlate" required pattern="[A-Z]{2}-[0-9]{3}-[A-Z]{2}" title="Plaque d'immatriculation" placeholder="AA-123-BB">
+    <div class="role-section card mb-4">
+        <div class="card-header">
+            Quel type d'utilisateur êtes-vous ?
+        </div>
+        <div class="card-body">
+            <div class="role-options mb-3">
+                <button class="role-btn btn btn-outline-secondary" data-role="passenger" id="passengerBtn">Passager Seulement</button>
+                <button class="role-btn btn btn-outline-secondary" data-role="driver" id="driverBtn">Chauffeur Seulement</button>
+                <button class="role-btn btn btn-outline-secondary" data-role="both" id="bothBtn">Passager et Chauffeur</button>
             </div>
-    
-            <div class="form-group">
-                <label for="firstRegistration">Date première immatriculation</label>
-                <input type="date" id="firstRegistration" name="firstRegistration" required title="Date première immatriculation" placeholder="JJ/MM/AAAA">
-            </div>
-    
-            <div class="form-group">
-                <label for="vehicleSelect">Véhicule</label>
-                <select id="vehicleSelect" name="vehicule" required title="Sélectionner un véhicule">
-                    <option value="">Sélectionner un véhicule</option>
-                    <!-- Options dynamiques via JS -->
-                </select>
-            </div>
-    
-            <div class="form-group">
-                <label for="availableSeats">Places disponibles</label>
-                <input type="number" id="availableSeats" name="availableSeats" min="1" max="8" required title="Nombre de places disponibles" placeholder="Nombre de places">
-            </div>
-    
-            <div class="form-group">
-                <label>Préférences</label>
-                <div class="preferences">
-                    <label><input type="checkbox" name="preferences[]" value="fumeur"> Fumeur</label>
-                    <label><input type="checkbox" name="preferences[]" value="animaux"> Animaux</label>
-                    <!-- Ajout dynamique possible -->
+             <p class="text-muted small text-center">Sélectionnez "Chauffeur" ou "Passager et Chauffeur" pour accéder aux options de véhicule et de trajet.</p>
+            <form id="driverForm" class="driver-form d-none mt-4 border-top pt-4">
+                <div id="driverActions" class="mt-4 pt-4 border-top d-none"> {# Sera affiché en même temps que le form #}
+                    <h4 class="mb-3">Actions Chauffeur</h4>
+                    <a href="/trajet/nouveau" data-link class="btn btn-success">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Proposer un nouveau trajet
+                    </a>
+                    {# TODO: Ajouter lien vers 'Mes trajets proposés' ? #}
                 </div>
-            </div>
-    
-            <button type="submit">Enregistrer</button>
-        </form>
-    </div>
-    <div class="text-center">
-        <button type="submit" class="btn btn-primary" id="editInfoBtn">Modifier vos information</button>
-    </div>
-    <div class="text-center pt-3">
-        <a href="/editPassword">Cliquez ici pour modifier votre mot de passe</a>
-    </div>
-    <script src="../js/auth/account.js"></script>
+                <h3 class="mb-3">Informations Chauffeur</h3>
+                <div id="driver-form-feedback" class="mb-3"></div> 
 
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label for="licensePlate" class="form-label">Plaque d'immatriculation</label>
+                        <input type="text" class="form-control" id="licensePlate" name="licensePlate" required pattern="[A-Z]{2}-\d{3}-[A-Z]{2}" title="Format AA-123-BB" placeholder="AA-123-BB">
+                        <div class="invalid-feedback">Plaque invalide ou manquante (Format: AA-123-BB).</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="firstRegistration" class="form-label">Date 1ère immat.</label>
+                        <input type="date" class="form-control" id="firstRegistration" name="firstRegistration" required>
+                         <div class="invalid-feedback">Date manquante.</div>
+                    </div>
 
+                    <div class="col-12 mb-3">
+                         <label for="vehicleSelect" class="form-label">Mon Véhicule Principal</label>
+                         <div class="input-group">
+                             <select class="form-select" id="vehicleSelect" name="vehicleId" required>
+                                 <option value="" selected disabled>Sélectionner un véhicule...</option>
+                             </select>
+                           
+                             <button class="btn btn-outline-secondary" type="button" id="manageVehiclesBtn" disabled>Gérer mes véhicules (non implémenté)</button>
+                         </div>
+                         <div class="invalid-feedback">Veuillez sélectionner un véhicule.</div>
+                     </div>
+
+                     <div class="col-md-6 mb-3">
+                        <label for="availableSeats" class="form-label">Places proposées (hors conducteur)</label>
+                        <input type="number" class="form-control" id="availableSeats" name="availableSeats" min="1" max="8" required placeholder="Ex: 3">
+                         <div class="invalid-feedback">Nombre de places invalide (1-8).</div>
+                    </div>
+
+                     <div class="col-12 mb-3">
+                        <label class="form-label d-block">Préférences Trajet</label>
+                        <div class="preferences row">
+                            <fieldset class="col-md-6">
+                                <legend class="h6 small">Fumeur</legend>
+                                <div class="form-check form-check-inline">
+                                     <input class="form-check-input" type="radio" name="pref_fumeur" id="pref_non_fumeur" value="non_fumeur" checked>
+                                     <label class="form-check-label" for="pref_non_fumeur">Non fumeur</label>
+                                </div>
+                                 <div class="form-check form-check-inline">
+                                     <input class="form-check-input" type="radio" name="pref_fumeur" id="pref_fumeur_ok" value="fumeur_ok">
+                                     <label class="form-check-label" for="pref_fumeur_ok">Fumeur accepté</label>
+                                </div>
+                            </fieldset>
+                            <fieldset class="col-md-6">
+                                <legend class="h6 small">Animaux</legend>
+                                 <div class="form-check form-check-inline">
+                                     <input class="form-check-input" type="radio" name="pref_animaux" id="pref_pas_animaux" value="pas_animaux" checked>
+                                     <label class="form-check-label" for="pref_pas_animaux">Pas d'animaux</label>
+                                </div>
+                                 <div class="form-check form-check-inline">
+                                     <input class="form-check-input" type="radio" name="pref_animaux" id="pref_animaux_ok" value="animaux_ok">
+                                     <label class="form-check-label" for="pref_animaux_ok">Animaux acceptés</label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div> 
+
+                <div class="text-center mt-3">
+                    <button type="submit" class="btn btn-primary">Enregistrer les informations Chauffeur</button>
+                </div>
+            </form>
+        </div>
+    </div> 
+
+     <div id="passengerSection" class="passenger-section card d-none">
+         <div class="card-header">Informations Passager</div>
+         <div class="card-body">
+             <p>Vous utilisez EcoRide en tant que passager. Aucune information spécifique n'est requise.</p>
+             <p><a href="/covoiturages" data-link>Rechercher un covoiturage</a></p>
+
+             {# TODO: Afficher ici l'historique des trajets effectués en tant que passager (US 10) #}
+
+         </div>
+     </div>
 </section>

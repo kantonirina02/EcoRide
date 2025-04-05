@@ -1,0 +1,77 @@
+<div class="trajet-new-page container py-4">
+    <h1 class="text-center mb-4">Proposer un Nouveau Trajet</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div id="trajet-error" class="alert alert-danger d-none" role="alert"></div>
+            <div id="trajet-success" class="alert alert-success d-none" role="alert"></div>
+
+            <form id="new-trajet-form" novalidate>
+                <h4 class="mb-3">Itinéraire</h4>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="trajet-depart" class="form-label">Lieu de départ</label>
+                        <input type="text" class="form-control" id="trajet-depart" name="depart" placeholder="Adresse ou Ville" required>
+                        <div class="invalid-feedback">Le lieu de départ est requis.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="trajet-arrivee" class="form-label">Lieu d'arrivée</label>
+                        <input type="text" class="form-control" id="trajet-arrivee" name="arrivee" placeholder="Adresse ou Ville" required>
+                        <div class="invalid-feedback">Le lieu d'arrivée est requis.</div>
+                    </div>
+                </div>
+
+                <h4 class="mb-3">Dates et Heures</h4>
+                 <div class="row g-3 mb-3">
+                     <div class="col-md-6">
+                        <label for="trajet-date-depart" class="form-label">Date de départ</label>
+                        <input type="date" class="form-control" id="trajet-date-depart" name="date_depart" required>
+                         <div class="invalid-feedback">Date de départ requise.</div>
+                    </div>
+                     <div class="col-md-6">
+                        <label for="trajet-heure-depart" class="form-label">Heure de départ</label>
+                        <input type="time" class="form-control" id="trajet-heure-depart" name="heure_depart" required>
+                        <div class="invalid-feedback">Heure de départ requise.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="trajet-date-arrivee" class="form-label">Date d'arrivée (estimée)</label>
+                        <input type="date" class="form-control" id="trajet-date-arrivee" name="date_arrivee" required>
+                         <div class="invalid-feedback">Date d'arrivée requise.</div>
+                    </div>
+                     <div class="col-md-6">
+                        <label for="trajet-heure-arrivee" class="form-label">Heure d'arrivée (estimée)</label>
+                        <input type="time" class="form-control" id="trajet-heure-arrivee" name="heure_arrivee" required>
+                         <div class="invalid-feedback">Heure d'arrivée requise.</div>
+                    </div>
+                 </div>
+
+                <h4 class="mb-3">Détails du Covoiturage</h4>
+                 <div class="row g-3 mb-4">
+                     <div class="col-md-4">
+                        <label for="trajet-places" class="form-label">Places proposées</label>
+                        <input type="number" class="form-control" id="trajet-places" name="places" min="1" max="8" required placeholder="Ex: 3">
+                         <div class="invalid-feedback">Nombre de places invalide (1-8).</div>
+                    </div>
+                      <div class="col-md-4">
+                        <label for="trajet-prix" class="form-label">Prix par passager (€)</label>
+                        <input type="number" step="0.50" min="0" class="form-control" id="trajet-prix" name="prix" required placeholder="Ex: 15.50">
+                        <div class="invalid-feedback">Prix invalide ou manquant.</div>
+                    </div>
+                     <div class="col-md-4">
+                        <label for="trajet-vehicule" class="form-label">Véhicule utilisé</label>
+                         <select class="form-select" id="trajet-vehicule" name="vehicleId" required>
+                             <option value="" selected disabled>Chargement...</option>
+                             {# Sera rempli par JS avec les véhicules du chauffeur #}
+                         </select>
+                          <div class="invalid-feedback">Veuillez sélectionner un véhicule.</div>
+                     </div>
+                 </div>
+
+                 <div class="text-center">
+                     <button type="submit" class="btn btn-success btn-lg">Proposer ce Trajet</button>
+                 </div>
+
+            </form>
+        </div>
+    </div>
+</div>
