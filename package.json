@@ -4,7 +4,8 @@
   "description": "C'est un site de covoiturega",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "live-server --verbose", 
+    "dev": "live-server --verbose"    
   },
   "keywords": [],
   "author": "",
@@ -13,8 +14,18 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3"
   },
-  "devDependencies": {
-    "connect-history-api-fallback": "^2.0.0",
-    "path": "^0.12.7"
+ "devDependencies": {
+    "connect-history-api-fallback": "^2.0.0", 
+    "live-server": "^1.2.2"
+  },
+  "live-server": {
+    "port": 8080,
+    "host": "0.0.0.0",
+    "root": ".",      
+    "open": true,     
+    "file": "index.html", 
+    "middleware": [ 
+       "./live-server-middleware.js"
+       ]
   }
 }

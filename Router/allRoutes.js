@@ -24,7 +24,7 @@ export const allRoutes = [
     new Route("/trajet/nouveau", "Proposer un Trajet", "/pages/trajet_new.html", ["driver", "both"], "/js/trajet_new.js"),
     new Route("/editPassword","Modifier mon mot de passe", ["user", "employee", "admin"],"/pages/editPassword.html"),
     new Route("/employe/avis", "Modération Avis", "/pages/admin/avis_moderation.html", ["employee", "admin"], "/js/admin/avis_moderation.js"),
-
+    new Route("/admin/dashboard", "Dashboard Admin", "/pages/admin/dashboard.html", ["admin"], "/js/admin/dashboard.js"),
 ];
 
 //Le titre s'affiche comme ceci : Route.titre - websitename

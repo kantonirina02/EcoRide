@@ -99,12 +99,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private Collection $avisDonnes;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 0])] 
+    #[Groups(['user:read'])] 
+    #[Assert\PositiveOrZero] 
+    private ?int $credits = 0; 
+
     public function __construct()
     {
         $this->roles = new ArrayCollection();
         $this->voitures = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->avisDonnes = new ArrayCollection();
+        $this->credits = 20;
     }
 
     // --- Getters et Setters (inchangés pour les propriétés simples) ---
@@ -128,8 +134,24 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
     public function getPseudo(): ?string { return $this->pseudo; }
     public function setPseudo(?string $pseudo): static { $this->pseudo = $pseudo; return $this; }
+    public function getCredits(): ?int{return $this->credits;}
+    public function setCredits(int $credits): static{$this->credits = $credits;return $this;}
 
-
+    public function addCredits(int $amount): static
+     {
+         if ($amount > 0) {
+             $this->credits += $amount;
+         }
+         return $this;
+     }
+     public function removeCredits(int $amount): bool // Retourne true si succès
+     {
+         if ($amount > 0 && $this->credits >= $amount) {
+             $this->credits -= $amount;
+             return true;
+         }
+         return false;
+     }
     // --- Méthodes UserInterface ---
 
     public function getUserIdentifier(): string { return (string) $this->email; }

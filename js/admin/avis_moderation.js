@@ -1,33 +1,45 @@
 console.log("Exécution script avis_moderation.js");
 
-// --- Données Fictives d'Avis (Simulation) ---
-// récupérées via API 
+// --- Données Fictives Avis ---
 let allAvisFictifs = [
     { id: 101, covoitId: 1, auteurPseudo: "Passager1", chauffeurPseudo: "ChauffeurCool75", note: 5, commentaire: "Trajet parfait, conduite très agréable !", statut: "Approuvé" },
     { id: 102, covoitId: 1, auteurPseudo: "Passager2", chauffeurPseudo: "ChauffeurCool75", note: 4, commentaire: "Bon conducteur, voiture propre.", statut: "Approuvé" },
-    { id: 103, covoitId: 2, auteurPseudo: "Passager3", chauffeurPseudo: "VoyageurPro", note: 4, commentaire: "Bien, mais un peu de retard.", statut: "En attente" }, // <= En attente
+    { id: 103, covoitId: 2, auteurPseudo: "Passager3", chauffeurPseudo: "VoyageurPro", note: 4, commentaire: "Bien, mais un peu de retard.", statut: "En attente" },
     { id: 104, covoitId: 3, auteurPseudo: "Passager4", chauffeurPseudo: "Soleil13", note: 5, commentaire: "Super sympa et arrangeant !", statut: "Approuvé" },
     { id: 105, covoitId: 3, auteurPseudo: "Passager5", chauffeurPseudo: "Soleil13", note: 5, commentaire: "Conduite impeccable, je recommande.", statut: "Approuvé" },
     { id: 106, covoitId: 3, auteurPseudo: "Passager6", chauffeurPseudo: "Soleil13", note: 5, commentaire: "Ponctuel et agréable.", statut: "Approuvé" },
-    { id: 107, covoitId: 4, auteurPseudo: "Passager7", chauffeurPseudo: "NordisteRapide", note: 2, commentaire: "Conduite dangereuse et voiture sale.", statut: "En attente" }, // <= En attente
-    { id: 108, covoitId: 5, auteurPseudo: "Passager8", chauffeurPseudo: "RetourParis", note: 1, commentaire: "Ne s'est jamais présenté !", statut: "Rejeté" }, // <= Rejeté
-    { id: 109, covoitId: 1, auteurPseudo: "Passager9", chauffeurPseudo: "ChauffeurCool75", note: 5, commentaire: "Excellent !", statut: "En attente" }, // <= En attente
+    { id: 107, covoitId: 4, auteurPseudo: "Passager7", chauffeurPseudo: "NordisteRapide", note: 2, commentaire: "Conduite dangereuse et voiture sale.", statut: "En attente" },
+    { id: 108, covoitId: 5, auteurPseudo: "Passager8", chauffeurPseudo: "RetourParis", note: 1, commentaire: "Ne s'est jamais présenté !", statut: "Rejeté" },
+    { id: 109, covoitId: 1, auteurPseudo: "Passager9", chauffeurPseudo: "ChauffeurCool75", note: 5, commentaire: "Excellent !", statut: "En attente" },
 ];
 
-// Variable pour garder le filtre de statut actuel
-let currentStatusFilter = "En attente"; 
+// --- Données Fictives Trajets Signalés ---
+const reportedTripsFictifs = [
+    { covoitId: 2, signalementId: 501, passager: { pseudo: "Passager3", email: "p3@example.com" }, chauffeur: { pseudo: "VoyageurPro", email: "vp@example.com" }, trajet: { depart: "Paris", arrivee: "Lyon", date: "2025-04-05", heure: "09:30" }, raison: "Chauffeur très en retard sans prévenir, conduite un peu agressive.", statutSignalement: "A traiter" },
+    { covoitId: 4, signalementId: 502, passager: { pseudo: "Passager7", email: "p7@example.com" }, chauffeur: { pseudo: "NordisteRapide", email: "nr@example.com" }, trajet: { depart: "Paris", arrivee: "Lille", date: "2025-04-10", heure: "14:00" }, raison: "Le véhicule ne correspondait pas à celui annoncé et n'était pas très propre.", statutSignalement: "A traiter" }
+];
+
+let currentStatusFilter = "En attente";
 
 // --- Fonctions ---
 
-/**
- * Crée l'élément HTML pour afficher un avis dans la liste de modération
- * @param {object} avis - L'objet avis
- * @returns {HTMLElement} L'élément div.card
- */
+// +++ AJOUT DE LA FONCTION formatDate ICI +++
+function formatDate(dateString) {
+    if (!dateString) return '';
+    try {
+        const [year, month, day] = dateString.split('-');
+        if (year && month && day && year.length === 4 && month.length === 2 && day.length === 2) {
+             return `${day}/${month}/${year}`;
+        }
+    } catch (e) { /* Ignorer */ }
+    return dateString;
+}
+// +++ FIN AJOUT +++
+
 function createAvisModElement(avis) {
     const div = document.createElement('div');
     div.className = 'card mb-3';
-    div.dataset.avisId = avis.id; 
+    div.dataset.avisId = avis.id;
 
     let badgeClass = 'bg-secondary';
     if (avis.statut === 'En attente') badgeClass = 'bg-warning text-dark';
@@ -43,7 +55,6 @@ function createAvisModElement(avis) {
             <h6 class="card-subtitle mb-2 text-muted">Par: ${avis.auteurPseudo} | Pour: ${avis.chauffeurPseudo} | Note: ${avis.note}/5</h6>
             <p class="card-text">"${avis.commentaire}"</p>
         </div>
-        {# Afficher les boutons seulement si l'avis est 'En attente' #}
         ${avis.statut === 'En attente' ? `
         <div class="card-footer text-end">
             <button class="btn btn-sm btn-success approve-btn" data-avis-id="${avis.id}">
@@ -58,113 +69,114 @@ function createAvisModElement(avis) {
     return div;
 }
 
-/**
- * Affiche les avis filtrés dans le conteneur
- * @param {string} statut - Le statut à filtrer ('Tous', 'En attente', 'Approuvé', 'Rejeté')
- */
 function displayAvisList(statut = 'En attente') {
     console.log(`Affichage des avis avec statut: ${statut}`);
     const listContainer = document.getElementById('avis-list-container');
     if (!listContainer) return;
+    currentStatusFilter = statut;
 
-    currentStatusFilter = statut; 
-
-    // Met à jour le bouton de filtre actif
     document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.status === statut);
-         btn.classList.toggle('btn-primary', btn.dataset.status === statut); 
-          btn.classList.toggle('btn-outline-secondary', btn.dataset.status !== statut); 
+        const isActive = btn.dataset.status === statut;
+        btn.classList.toggle('active', isActive); // Pour ton style .active si tu en as un
+        btn.classList.toggle('btn-primary', isActive); // Style Bootstrap pour actif
+        btn.classList.toggle('btn-outline-secondary', !isActive); // Style Bootstrap pour inactif
     });
 
-    // Filtrer les données fictives
-    const avisToShow = statut === 'Tous'
-        ? allAvisFictifs
-        : allAvisFictifs.filter(avis => avis.statut === statut);
-
-    // Vider le conteneur
+    const avisToShow = statut === 'Tous' ? allAvisFictifs : allAvisFictifs.filter(avis => avis.statut === statut);
     listContainer.innerHTML = '';
 
-    // Afficher les avis ou un message
     if (avisToShow.length > 0) {
-        avisToShow.forEach(avis => {
-            const avisElement = createAvisModElement(avis);
-            listContainer.appendChild(avisElement);
-        });
+        avisToShow.forEach(avis => listContainer.appendChild(createAvisModElement(avis)));
     } else {
         listContainer.innerHTML = `<p class="text-center text-muted mt-4">Aucun avis trouvé avec le statut "${statut}".</p>`;
     }
 }
 
-/**
- * Simule la mise à jour du statut d'un avis
- * @param {number} avisId - L'ID de l'avis
- * @param {string} newStatus - 'Approuvé' ou 'Rejeté'
- */
 function updateAvisStatus(avisId, newStatus) {
-    console.log(`Tentative de mise à jour avis ID: ${avisId} vers statut: ${newStatus}`);
-
-    // Trouver l'avis dans nos données fictives
+    console.log(`Tentative MàJ avis ID: ${avisId} -> ${newStatus}`);
     const avisIndex = allAvisFictifs.findIndex(a => a.id === avisId);
-    if (avisIndex === -1) {
-        console.error("Avis non trouvé pour mise à jour.");
-        alert("Erreur: Avis introuvable.");
-        return;
-    }
+    if (avisIndex === -1) { /* ... erreur ... */ return; }
 
-    // Simuler la mise à jour (dans une vraie app, ce serait fait par l'API)
     allAvisFictifs[avisIndex].statut = newStatus;
     console.log("Statut mis à jour (simulation).");
-
-    // Rafraîchir l'affichage avec le filtre actuel pour voir le changement
-    // (l'avis disparaîtra de la liste "En attente")
-    displayAvisList(currentStatusFilter);
-
+    displayAvisList(currentStatusFilter); // Rafraîchir la vue actuelle
     alert(`L'avis #${avisId} a été marqué comme "${newStatus}".`);
 }
 
+function displayReportedTrips() {
+    console.log("Affichage des trajets signalés...");
+    const contentDiv = document.getElementById('reported-trips-content');
+    if (!contentDiv) { /* ... erreur ... */ return; }
+
+    const tripsToDisplay = reportedTripsFictifs.filter(trip => trip.statutSignalement === 'A traiter');
+    contentDiv.innerHTML = '';
+
+    if (tripsToDisplay.length > 0) {
+        const table = document.createElement('table');
+        table.className = 'table table-sm table-bordered table-hover';
+        table.innerHTML = `
+            <thead class="table-light">
+                <tr><th>Covoit ID</th><th>Trajet</th><th>Date</th><th>Passager</th><th>Chauffeur</th><th>Raison</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                ${tripsToDisplay.map(trip => `
+                    <tr>
+                        <td>${trip.covoitId}</td>
+                        <td>${trip.trajet.depart} -> ${trip.trajet.arrivee}</td>
+                        <td>${formatDate(trip.trajet.date)} ${trip.trajet.heure}</td> {# Appel formatDate local #}
+                        <td>${trip.passager.pseudo} (${trip.passager.email})</td>
+                        <td>${trip.chauffeur.pseudo} (${trip.chauffeur.email})</td>
+                        <td>${trip.raison}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Contacter</button>
+                            <button class="btn btn-sm btn-outline-success" data-signalement-id="${trip.signalementId}" disabled>Résolu</button>
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        contentDiv.appendChild(table);
+    } else {
+        contentDiv.innerHTML = '<p class="text-center text-muted">Aucun trajet signalé à traiter.</p>';
+    }
+     console.log("<- Fin displayReportedTrips");
+}
 
 // --- Initialisation et Écouteurs ---
 function initializeAvisModerationPage() {
     console.log("Initialisation page modération avis...");
-
     const listContainer = document.getElementById('avis-list-container');
     const filterButtonsContainer = document.querySelector('.avis-filters');
 
-    // 1. Afficher la liste initiale (avis en attente)
-    displayAvisList('En attente');
+    displayAvisList('En attente'); // Affichage initial
+    displayReportedTrips();     // Afficher trajets signalés
 
-    // 2. Ajouter les écouteurs pour les boutons de filtre (délégation)
+    // Écouteur pour les filtres
     if (filterButtonsContainer) {
         filterButtonsContainer.addEventListener('click', (event) => {
             const button = event.target.closest('.filter-btn');
-            if (button && button.dataset.status) {
-                console.log(`Clic sur filtre: ${button.dataset.status}`);
-                displayAvisList(button.dataset.status); // Ré-affiche la liste avec le nouveau filtre
-            }
+            if (button?.dataset.status) displayAvisList(button.dataset.status);
         });
-        console.log("Écouteur pour les filtres attaché.");
+        console.log("Écouteur filtres attaché.");
     }
 
-    // 3. Ajouter les écouteurs pour Approuver/Rejeter (délégation sur le conteneur)
+    // Écouteur pour Approuver/Rejeter
     if (listContainer) {
-         // Utiliser un seul écouteur sur le conteneur pour gérer tous les boutons internes
         listContainer.addEventListener('click', (event) => {
             const approveButton = event.target.closest('.approve-btn');
             const rejectButton = event.target.closest('.reject-btn');
             let avisId = null;
-
             if (approveButton) {
                 avisId = parseInt(approveButton.dataset.avisId, 10);
-                console.log(`Clic sur Approuver pour ID: ${avisId}`);
                 if(avisId) updateAvisStatus(avisId, 'Approuvé');
             } else if (rejectButton) {
                 avisId = parseInt(rejectButton.dataset.avisId, 10);
-                 console.log(`Clic sur Rejeter pour ID: ${avisId}`);
                  if(avisId) updateAvisStatus(avisId, 'Rejeté');
             }
         });
-         console.log("Écouteur pour Approuver/Rejeter attaché.");
+         console.log("Écouteur Approuver/Rejeter attaché.");
     }
+    // TODO: Ajouter listener pour les boutons des trajets signalés si besoin
 }
 
 // --- Exécution ---

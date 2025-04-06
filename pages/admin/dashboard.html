@@ -1,0 +1,56 @@
+<div class="admin-dashboard container py-4">
+    <h1 class="text-center mb-4">Tableau de Bord Administrateur</h1>
+
+    <section class="stats-cards row g-3 mb-5 text-center">
+        <div class="col-md-6">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Crédits Plateforme</h5>
+                    <p class="card-text display-4" id="total-credits-platform">...</p>
+                    <small class="text-muted">(Total gagné)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Utilisateurs Actifs</h5>
+                    <p class="card-text display-4" id="total-active-users">N/A</p>
+                     <small class="text-muted">(Simulation)</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="charts-section row g-4 mb-5">
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">Covoiturages Proposés / Jour</div>
+                <div class="card-body">
+                    <canvas id="covoitsPerDayChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+             <div class="card shadow-sm">
+                <div class="card-header">Crédits Gagnés / Jour</div>
+                <div class="card-body">
+                     <canvas id="creditsPerDayChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="admin-actions">
+        <h2 class="mb-3">Gestion</h2>
+        <div class="list-group">
+            <a href="/account" data-link class="list-group-item list-group-item-action">
+                <i class="bi bi-people-fill me-2"></i> Gérer / Suspendre les Comptes Utilisateurs
+            </a>
+             <a href="/employe/avis" data-link class="list-group-item list-group-item-action">
+                <i class="bi bi-card-checklist me-2"></i> Modérer les Avis
+            </a>
+        </div>
+    </section>
+
+</div>
