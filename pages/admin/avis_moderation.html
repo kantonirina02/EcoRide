@@ -1,0 +1,28 @@
+<div class="avis-moderation-page container py-4">
+    <h1 class="text-center mb-4">Modération des Avis</h1>
+
+    {# Section pour les filtres (par statut) #}
+    <div class="avis-filters text-center mb-4">
+        <button class="btn btn-sm btn-outline-secondary filter-btn active" data-status="En attente">En attente</button>
+        <button class="btn btn-sm btn-outline-secondary filter-btn" data-status="Approuvé">Approuvés</button>
+        <button class="btn btn-sm btn-outline-secondary filter-btn" data-status="Rejeté">Rejetés</button>
+        <button class="btn btn-sm btn-outline-secondary filter-btn" data-status="Tous">Tous</button>
+    </div>
+
+    {# Conteneur où la liste des avis sera injectée #}
+    <div id="avis-list-container">
+        <p class="text-center text-muted">Chargement des avis...</p>
+        {# Le contenu (liste ou message "aucun avis") sera mis ici par JS #}
+    </div>
+
+    {# Section pour les trajets signalés (US 12 - juste un placeholder ici) #}
+    <hr class="my-5">
+    <section id="reported-trips" class="mt-5">
+        <h2 class="text-center mb-4">Trajets Signalés</h2>
+        <div id="reported-trips-content">
+            <p class="text-center text-muted">(Fonctionnalité non implémentée dans cette simulation)</p>
+            {# Ici on afficherait les infos des trajets signalés comme problématiques #}
+        </div>
+    </section>
+
+</div>

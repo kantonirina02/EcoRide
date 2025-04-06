@@ -23,6 +23,7 @@ export const allRoutes = [
     new Route("/account","Mon Profil","/pages/account.html", ["user", "employee", "admin"], "/js/auth/account.js"),
     new Route("/trajet/nouveau", "Proposer un Trajet", "/pages/trajet_new.html", ["driver", "both"], "/js/trajet_new.js"),
     new Route("/editPassword","Modifier mon mot de passe", ["user", "employee", "admin"],"/pages/editPassword.html"),
+    new Route("/employe/avis", "Modération Avis", "/pages/admin/avis_moderation.html", ["employee", "admin"], "/js/admin/avis_moderation.js"),
 
 ];
 
