@@ -27,3 +27,7 @@ public/bundles/
 # Dépendances et fichiers générés par Docker (si applicable)
 docker-compose.override.yml
 /.docker/
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###

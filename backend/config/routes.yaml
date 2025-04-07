@@ -1,5 +1,16 @@
-controllers:
+controllers_base:
     resource:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+    exclude: ../src/Controller/Api/ # Exclut le dossier API de ce scan
+
+# Charge spécifiquement les contrôleurs dans le sous-dossier Api
+# Et leur ajoute automatiquement le préfixe /api
+controllers_api:
+    resource:
+        path: ../src/Controller/Api/ # Chemin vers tes contrôleurs API
+        namespace: App\Controller\Api # Namespace correspondant
+    type: attribute
+    prefix: /api # Ajoute /api devant toutes les routes définies dans ces contrôleurs
+    name_prefix: api_ # Ajoute api_ devant le nom de toutes ces routes (bonne pratique)
