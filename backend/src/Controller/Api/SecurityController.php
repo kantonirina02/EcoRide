@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Controller\Api; // Ou le namespace que tu préfères pour tes API
+namespace App\Controller\Api; 
 
-use App\Entity\Role; // Important: Importer l'entité Role
+use App\Entity\Role; 
 use App\Entity\Utilisateur;
-use App\Repository\RoleRepository; // Importer le Repository Role
-use App\Repository\UtilisateurRepository; // Pour vérifier si email/pseudo existe
+use App\Repository\RoleRepository;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse; // Pour les réponses JSON
+use Symfony\Component\HttpFoundation\JsonResponse; 
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\SerializerInterface; // Optionnel: si tu utilises le serializer pour désérialiser
+use Symfony\Component\Serializer\SerializerInterface; 
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\Constraints as Assert; // Pour validation custom si besoin
-use Symfony\Component\Security\Http\Attribute\IsGranted; // Import IsGranted for route security
+use Symfony\Component\Validator\Constraints as Assert; 
+use Symfony\Component\Security\Http\Attribute\IsGranted; 
 
 // Préfixe pour toutes les routes de ce contrôleur
 
@@ -47,21 +47,19 @@ class SecurityController extends AbstractController
         if ($userRepository->findOneBy(['pseudo' => $data['pseudo']])) {
             return $this->json(['message' => 'Ce pseudo est déjà utilisé.'], Response::HTTP_CONFLICT); // 409 Conflict
         }
-        // Ajouter une validation de base pour le mot de passe si besoin ici aussi
-        if (strlen($data['password']) < 6) { // Doit correspondre à la validation frontend/entité
+        
+        if (strlen($data['password']) < 6) { 
              return $this->json(['message' => 'Le mot de passe doit faire au moins 6 caractères.'], Response::HTTP_BAD_REQUEST);
         }
-        // --- Fin Validation Simple ---
+       
 
-
-        // 2. Créer une nouvelle instance Utilisateur
+        // 2. Créer une nouvelle instance Utilisateur+
         $user = new Utilisateur();
         $user->setPseudo($data['pseudo']);
         $user->setEmail($data['email']);
         $user->setNom($data['nom']);
         $user->setPrenom($data['prenom']);
-        // Les crédits sont initialisés à 20 par le constructeur, pas besoin de le faire ici
-
+        // Les crédits sont initialisés à 20 par le constructeur
         // 3. Hacher le mot de passe
         $hashedPassword = $passwordHasher->hashPassword(
             $user,

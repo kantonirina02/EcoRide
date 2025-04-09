@@ -1,16 +1,11 @@
 console.log("Exécution script signin.js");
 
-// Namespace pour cette page
 window.ecoRideSigninPage = window.ecoRideSigninPage || {};
 
-// --- Fonctions attachées au namespace ---
-
-// Fonction pour gérer la tentative de connexion
 window.ecoRideSigninPage.handleLogin = async function(event) {
-    if(event) event.preventDefault(); // Empêche la soumission HTML si appelée depuis un formulaire
+    if(event) event.preventDefault(); 
     console.log("Tentative de connexion...");
 
-    // Cibler les éléments à l'intérieur de la fonction pour être sûr qu'ils existent
     const mailInput = document.getElementById("EmailInput");
     const passwordInput = document.getElementById("PasswordInput");
     const errorDiv = document.getElementById("signin-error");
@@ -23,7 +18,7 @@ window.ecoRideSigninPage.handleLogin = async function(event) {
     const email = mailInput ? mailInput.value.trim() : '';
     const password = passwordInput ? passwordInput.value : '';
 
-    // Validation client simple
+    // Validation client 
     if (!email || !password) {
         if(errorDiv) { errorDiv.textContent = "Email et mot de passe requis."; errorDiv.classList.remove('d-none'); }
         if(!email && mailInput) mailInput.classList.add("is-invalid");
@@ -55,12 +50,12 @@ window.ecoRideSigninPage.handleLogin = async function(event) {
         // --- Succès ---
         console.log("Connexion réussie ! Réponse API:", data);
         const token = data.token;
-        // Adapter la récupération du rôle selon la réponse réelle de ton API
-        const userRole = data.user?.role || data.role || (JSON.parse(atob(token.split('.')[1]))?.roles?.[0]) || 'user'; // Différentes tentatives
+      
+        const userRole = data.user?.role || data.role || (JSON.parse(atob(token.split('.')[1]))?.roles?.[0]) || 'user'; 
 
         if (!token) throw new Error("Token JWT non reçu.");
 
-        console.log(`Token: ...${token.slice(-10)}`); // Affiche juste la fin
+        console.log(`Token: ...${token.slice(-10)}`); 
         console.log(`Rôle: ${userRole}`);
 
         if(window.setToken && window.setCookie && window.RoleCookieName) {
@@ -68,7 +63,7 @@ window.ecoRideSigninPage.handleLogin = async function(event) {
             window.setCookie(window.RoleCookieName, userRole, 7);
             console.log("Cookies Token et Role définis.");
 
-            // Redirection (utilise window.location.replace pour ne pas pouvoir faire retour)
+            // Redirection 
             console.log(`Redirection basée sur le rôle '${userRole}'...`);
             if (userRole === 'admin') window.location.replace('/admin/dashboard');
             else if (userRole === 'employee') window.location.replace('/employe/avis');
@@ -93,14 +88,14 @@ window.ecoRideSigninPage.handleLogin = async function(event) {
 // --- Initialisation de la Page Signin (appelée à chaque chargement du script) ---
 window.ecoRideSigninPage.initialize = function() {
     // Vérifier si déjà initialisé pour ne pas réattacher les listeners
-     if (window.ecoRideSigninPage.isInitialized && document.getElementById('signin-form')) { // Vérifie aussi la présence du form
+     if (window.ecoRideSigninPage.isInitialized && document.getElementById('signin-form')) { 
          console.log("Page Signin déjà initialisée.");
          return;
      }
     console.log("Initialisation page Signin...");
 
     const signinForm = document.getElementById("signin-form");
-    const btnSignin = document.getElementById("btnSignin"); // Au cas où
+    const btnSignin = document.getElementById("btnSignin"); 
 
      // Fonction pour attacher l'écouteur en évitant doublon
      const attachListenerIfNeeded = (element, eventName, handler) => {
@@ -114,9 +109,8 @@ window.ecoRideSigninPage.initialize = function() {
         return false;
     };
 
-    // Attacher l'écouteur au formulaire (préférable) ou au bouton
+    // Attacher l'écouteur au formulaire ou au bouton
     if (!attachListenerIfNeeded(signinForm, "submit", window.ecoRideSigninPage.handleLogin)) {
-         // Si le form n'a pas été trouvé ou listener déjà attaché, essaie le bouton
          if(attachListenerIfNeeded(btnSignin, "click", window.ecoRideAccountPage.handleLogin)){
               console.warn("Écouteur attaché au bouton Signin (formulaire #signin-form non trouvé ou listener déjà présent).");
          } else if (!signinForm && !btnSignin) {
@@ -124,10 +118,8 @@ window.ecoRideSigninPage.initialize = function() {
          }
     }
 
-    // Marquer comme initialisé (utilise le namespace)
     window.ecoRideSigninPage.isInitialized = true;
      console.log("Page Signin initialisée.");
 };
 
-// --- Exécution ---
 window.ecoRideSigninPage.initialize();

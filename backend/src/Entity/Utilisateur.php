@@ -71,9 +71,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Role>
      */
     // Vérifie le 'inversedBy' dans ton entité Role si la relation est bidirectionnelle
-    #[ORM\ManyToMany(targetEntity: Role::class /*, inversedBy: 'utilisateurs' */)]
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'utilisateurs')]
     #[Groups(['user:read', 'user:write'])]
-    private Collection $roles; // Nom en minuscule
+    private Collection $roles; 
 
     /**
      * @var Collection<int, Voiture>

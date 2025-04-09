@@ -1,6 +1,5 @@
 security:
     password_hashers:
-        # Utiliser directement l'entité est souvent plus clair
         App\Entity\Utilisateur: 'auto'
 
     providers:
@@ -17,9 +16,6 @@ security:
         login:
             pattern: ^/api/login_check
             stateless: true
-            custom_authenticators:
-                    - App\Security\JWTLoginAuthenticator
-            entry_point: App\Security\JWTLoginAuthenticator
 
             json_login:
                 check_path: /api/login_check
@@ -28,28 +24,25 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        main: # Pare-feu principal pour le reste de l'API
+        main: 
             stateless: true
-            provider: app_user_provider # Référence au provider ci-dessus
-            jwt: ~ # <<< CORRECTION: jwt est une option DE 'main'
+            provider: app_user_provider 
+            jwt: ~ 
 
-            # Les commentaires sur activate/switch_user étaient sous jwt,
-            # ils doivent être sous main s'ils s'appliquent à main
-            # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
             # https://symfony.com/doc/current/security/impersonating_user.html
             # switch_user: true
 
     access_control:
-        # Règles d'accès (ordre important)
+        
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         # - { path: ^/api/admin, roles: ROLE_ADMIN } # Décommente si besoin
         # - { path: ^/api/employe, roles: [ROLE_EMPLOYEE, ROLE_ADMIN] } # Décommente si besoin
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY } # Protéger le reste de /api
 
-# Pas besoin de règles pour les routes frontend ici car gérées par le routeur JS et live-server
+
 
 when@test:
     security:

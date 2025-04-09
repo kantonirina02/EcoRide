@@ -1,190 +1,181 @@
+console.log("Exécution script script.js");
+
 const tokenCookieName = "accesstoken";
 const RoleCookieName = "role";
 const creditsLocalStorageKey = "ecoRideUserCredits";
 
-function getRole(){
-    return getCookie(RoleCookieName) || 'disconnected';
-}
-
-function signout(){
-    eraseCookie(tokenCookieName);
-    eraseCookie(RoleCookieName);
-    window.location.reload();
-}
-
-function setToken(token){
-    setCookie(tokenCookieName, token, 7);
-}
-
-function getToken(){
-    return getCookie(tokenCookieName);
-}
-
-function setCookie(name,value,days) {
+// --- Fonctions Cookies ---
+function setCookie(name, value, days) {
     var expires = "";
     if (days) {
         var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
     let secureAttribute = window.location.protocol === 'https:' ? '; Secure' : '';
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/; SameSite=Lax" + secureAttribute;
-    console.log(`Cookie set: ${name}=${value}`);
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax" + secureAttribute;
+    console.log(`Cookie set: ${name}=${value ? value.substring(0,10)+'...' : '""'}`); 
 }
 
 function getCookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
+    for (var i = 0; i < ca.length; i++) {
         var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
 }
 
-function eraseCookie(name) {   
+function eraseCookie(name) {
     console.log(`Erasing cookie: ${name}`);
     let secureAttribute = window.location.protocol === 'https:' ? '; Secure' : '';
     document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax' + secureAttribute;
 }
 
-function isConnected() {
-    // return (getToken() == null || getToken == undefined); // Ancienne version potentiellement problématique
-    return getToken() != null; // Plus simple et sûr
+
+// --- Fonctions Auth/Rôle ---
+function setToken(token){
+    console.log("Appel setToken");
+    setCookie(tokenCookieName, token, 7); 
 }
 
-    // --- Gestion Crédits (Simulation) ---
-/**
- * Récupère le nombre de crédits de l'utilisateur depuis localStorage.
- * Initialise à 20 si non défini.
- * @returns {number} Le nombre de crédits.
- */
+function getToken(){
+    return getCookie(tokenCookieName); 
+}
+
+function getRole(){
+    const role = getCookie(RoleCookieName) || 'disconnected';
+    return role;
+}
+
+function isConnected() {
+    const connected = getToken() != null;
+    return connected;
+}
+
+function signout(){
+    console.log("Appel signout");
+    eraseCookie(tokenCookieName);
+    eraseCookie(RoleCookieName);
+    localStorage.removeItem(creditsLocalStorageKey); 
+    window.location.replace('/'); 
+}
+
+
+// --- Fonctions Crédits ---
 function getUserCredits() {
     const storedCredits = localStorage.getItem(creditsLocalStorageKey);
-    // Si rien n'est stocké ou si ce n'est pas un nombre valide, on initialise à 20
     if (storedCredits === null || isNaN(parseInt(storedCredits, 10))) {
-        console.log("Initialisation des crédits fictifs à 20.");
+        if (localStorage.getItem(creditsLocalStorageKey) === null) {
+             console.log("Initialisation des crédits fictifs à 20.");
+        }
         localStorage.setItem(creditsLocalStorageKey, '20');
         return 20;
     }
+    
     return parseInt(storedCredits, 10);
 }
 
-/**
- * Met à jour le nombre de crédits dans localStorage.
- * @param {number} newCreditAmount - Le nouveau montant de crédits.
- */
 function setUserCredits(newCreditAmount) {
     if (typeof newCreditAmount === 'number' && !isNaN(newCreditAmount)) {
-        const credits = Math.max(0, Math.floor(newCreditAmount)); // Assure positif et entier
+        const credits = Math.max(0, Math.floor(newCreditAmount));
         localStorage.setItem(creditsLocalStorageKey, credits.toString());
         console.log(`Crédits fictifs mis à jour à : ${credits}`);
-        // TODO: Mettre à jour l'affichage des crédits si visible quelque part (ex: navbar, profil)
+        
+        const userCreditsSpan = document.getElementById('user-credits');
+        if(userCreditsSpan) userCreditsSpan.textContent = credits;
     } else {
-        console.error("Tentative de mise à jour des crédits avec une valeur invalide:", newCreditAmount);
+        console.error("Tentative de MàJ crédits avec valeur invalide:", newCreditAmount);
     }
 }
 
-/**
- * Décrémente les crédits de l'utilisateur.
- * @param {number} amountToDeduct - Le nombre de crédits à déduire.
- * @returns {boolean} True si la déduction a réussi, False sinon (crédits insuffisants).
- */
 function addUserCredits(amountToAdd) {
-    const currentCredits = getUserCredits();
+    const currentCredits = getUserCredits(); // Lecture de la valeur actuelle
     if (typeof amountToAdd === 'number' && amountToAdd > 0) {
-        setUserCredits(currentCredits + amountToAdd); // setUserCredits gère le floor et >= 0
-        console.log(`Simulation: ${amountToAdd} crédits ajoutés.`);
-        return true; // Succès
+        console.log(`Ajout de ${amountToAdd} crédits aux ${currentCredits} actuels.`);
+        setUserCredits(currentCredits + amountToAdd); // Mise à jour
+        return true;
     }
-    console.error(`Tentative d'ajout de crédits invalide: ${amountToAdd}`);
-    return false; // Échec
+    console.error(`Tentative d'ajout crédits invalide: ${amountToAdd}`);
+    return false;
 }
+
 function deductUserCredits(amountToDeduct) {
-    const currentCredits = getUserCredits();
+    const currentCredits = getUserCredits(); // Lecture de la valeur actuelle
     if (typeof amountToDeduct === 'number' && amountToDeduct > 0 && currentCredits >= amountToDeduct) {
-        setUserCredits(currentCredits - amountToDeduct);
-        return true; // Succès
+        console.log(`Déduction de ${amountToDeduct} crédits des ${currentCredits} actuels.`);
+        setUserCredits(currentCredits - amountToDeduct); // Mise à jour
+        return true;
     }
-    console.warn(`Tentative de déduction de ${amountToDeduct} échouée. Crédits actuels: ${currentCredits}`);
-    return false; // Échec
+    console.warn(`Déduction ${amountToDeduct} échouée. Crédits: ${currentCredits}`);
+    return false;
 }
-getUserCredits();
- 
-// --- Gestion Affichage conditionnel
+
+
+// --- Gestion Affichage Conditionnel ---
 function showAndHideElementsForRoles(){
-    const userConnected = isConnected();
-    const role = userConnected ? getRole() : 'disconnected';
+    const userConnected = isConnected(); 
+    const role = userConnected ? getRole() : 'disconnected'; 
+    console.log(`showAndHide: Status -> connected=${userConnected}, role=${role}`);
 
-    let allElementsToEdit = document.querySelectorAll('[data-show]');
-
-    allElementsToEdit.forEach(element =>{
-
+    document.querySelectorAll('[data-show]').forEach(element => {
         const showCondition = element.dataset.show;
         let shouldBeVisible = false;
-
         switch(showCondition){
-            case 'disconnected': 
-                shouldBeVisible = !userConnected;
-                break;
-            case 'connected': 
-                shouldBeVisible = userConnected;
-                break;
-            case 'admin': 
-                shouldBeVisible = userConnected && role === 'admin';
-                break;
-            case 'employee': 
-            shouldBeVisible = userConnected && (role === 'employee' /*|| role === 'admin'*/);
-                break;
-            case 'user': 
-            shouldBeVisible = userConnected && (role === 'user' /*|| role === 'employee' || role === 'admin'*/);
-                break;
+            case 'disconnected': shouldBeVisible = !userConnected; break;
+            case 'connected': shouldBeVisible = userConnected; break;
+            case 'admin': shouldBeVisible = userConnected && role === 'admin'; break;
+            // Gérer plusieurs rôles dans data-show (ex: "employee admin")
             default:
-                const rolesAllowed = showCondition.split(/[\s,]+/);
+                const rolesAllowed = showCondition.split(/[\s,]+/); 
                 if(userConnected && rolesAllowed.includes(role)){
                     shouldBeVisible = true;
                 }
                 break;
         }
-        if (shouldBeVisible) {
-            element.classList.remove('d-none');
-        } else {
-            element.classList.add('d-none');
-        }
+        element.classList.toggle('d-none', !shouldBeVisible);
     });
+    console.log("<- Fin showAndHideElementsForRoles");
 }
 
-// Fonction pour initialiser les éléments qui existent dès le début
+
+// --- Initialisation Globale et Écouteurs ---
 function initializeGlobalElements() {
     console.log("Initialisation des éléments globaux (script.js)...");
-
-    getUserCredits();
+    
+    window.getUserCredits(); // Vérifie/Initialise les crédits
     console.log("Vérification/Initialisation des crédits effectuée.");
-
-    showAndHideElementsForRoles();
+    window.showAndHideElementsForRoles(); 
     console.log("Affichage initial des rôles mis à jour.");
 
-    // Attacher l'écouteur au bouton de déconnexion SEULEMENT s'il existe
+    // Attacher l'écouteur au bouton de déconnexion
     const signoutButton = document.getElementById("signout-btn");
-    if (signoutButton) {
-        // Vérifier s'il n'est pas déjà attaché pour éviter les doublons
-        if (!signoutButton.hasAttribute('data-listener-attached')) {
-            signoutButton.addEventListener("click", signout);
-            signoutButton.setAttribute('data-listener-attached', 'true');
-            console.log("Écouteur ajouté au bouton de déconnexion.");
-        }
-    } else {
-        console.log("Bouton de déconnexion non trouvé (utilisateur probablement déconnecté).");
+    if (signoutButton && !signoutButton.hasAttribute('data-listener-attached')) {
+        signoutButton.addEventListener("click", signout); 
+        signoutButton.setAttribute('data-listener-attached', 'true');
+        console.log("Écouteur ajouté au bouton de déconnexion.");
+    } else if (!signoutButton) {
+       
     }
 }
+
 document.addEventListener('DOMContentLoaded', initializeGlobalElements);
 
-window.isConnected = isConnected;
+window.setCookie = setCookie;
+window.getCookie = getCookie;
+window.eraseCookie = eraseCookie;
+window.setToken = setToken;
+window.getToken = getToken;
 window.getRole = getRole;
-window.showAndHideElementsForRoles = showAndHideElementsForRoles;
+window.isConnected = isConnected;
 window.getUserCredits = getUserCredits;
+window.setUserCredits = setUserCredits; 
 window.deductUserCredits = deductUserCredits;
 window.addUserCredits = addUserCredits;
+window.showAndHideElementsForRoles = showAndHideElementsForRoles; 
 
 console.log("script.js : Fonctions globales exposées sur window.");
+
+console.log("Fin exécution script.js"); 
