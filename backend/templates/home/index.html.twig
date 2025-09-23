@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - EcoRide{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="bi bi-car-front"></i> EcoRide
+                </h1>
+                <p class="lead mb-4">
+                    La plateforme de covoiturage écologique qui vous connecte avec des conducteurs
+                    responsables et vous fait économiser sur vos trajets quotidiens.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    {% if not app.user %}
+                    <a href="{{ path('app_register') }}" class="btn btn-light btn-lg px-4 me-md-2">
+                        <i class="bi bi-person-plus"></i> S'inscrire
+                    </a>
+                    <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                    </a>
+                    {% else %}
+                    <a href="{{ path('covoiturage_index') }}" class="btn btn-light btn-lg px-4 me-md-2">
+                        <i class="bi bi-search"></i> Trouver un covoiturage
+                    </a>
+                    <a href="{{ path('covoiturage_new') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-plus-circle"></i> Proposer un trajet
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="bi bi-car-front display-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistiques -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-people display-4 text-primary mb-3"></i>
+                        <h2 class="text-primary">{{ stats.utilisateurs ?? 0 }}</h2>
+                        <p class="text-muted mb-0">Utilisateurs inscrits</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-car-front display-4 text-success mb-3"></i>
+                        <h2 class="text-success">{{ stats.covoiturages ?? 0 }}</h2>
+                        <p class="text-muted mb-0">Trajets disponibles</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-truck display-4 text-info mb-3"></i>
+                        <h2 class="text-info">{{ stats.voitures ?? 0 }}</h2>
+                        <p class="text-muted mb-0">Véhicules enregistrés</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <i class="bi bi-star display-4 text-warning mb-3"></i>
+                        <h2 class="text-warning">{{ stats.avis ?? 0 }}</h2>
+                        <p class="text-muted mb-0">Avis partagés</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fonctionnalités -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Pourquoi choisir EcoRide ?</h2>
+                <p class="lead text-muted">Une plateforme complète pour vos besoins de covoiturage</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-shield-check display-4 text-success mb-3"></i>
+                        <h4 class="card-title">Sécurité garantie</h4>
+                        <p class="card-text text-muted">
+                            Système de vérification des profils et d'évaluation mutuelle
+                            pour des trajets en toute confiance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cash-coin display-4 text-warning mb-3"></i>
+                        <h4 class="card-title">Économies assurées</h4>
+                        <p class="card-text text-muted">
+                            Partagez les frais de carburant et réduisez vos dépenses
+                            de transport de manière significative.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-tree display-4 text-info mb-3"></i>
+                        <h4 class="card-title">Écologie responsable</h4>
+                        <p class="card-text text-muted">
+                            Réduisez votre empreinte carbone en optimisant
+                            le taux de remplissage des véhicules.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comment ça marche -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Comment ça marche ?</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h1 class="mb-0">1</h1>
+                    </div>
+                </div>
+                <h4>Inscription</h4>
+                <p class="text-muted">
+                    Créez votre compte en quelques clics et complétez votre profil
+                    avec vos informations de véhicule si vous êtes conducteur.
+                </p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h1 class="mb-0">2</h1>
+                    </div>
+                </div>
+                <h4>Recherche</h4>
+                <p class="text-muted">
+                    Trouvez le covoiturage parfait selon vos critères :
+                    destination, horaires, prix et préférences.
+                </p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <h1 class="mb-0">3</h1>
+                    </div>
+                </div>
+                <h4>Voyage</h4>
+                <p class="text-muted">
+                    Réservez votre place, rencontrez votre covoitureur
+                    et profitez d'un trajet convivial et économique.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Derniers covoiturages -->
+{% if derniers_covoiturages|length > 0 %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Trajets récents</h2>
+                <p class="lead text-muted">Découvrez les dernières opportunités de covoiturage</p>
+            </div>
+        </div>
+        <div class="row">
+            {% for covoiturage in derniers_covoiturages|slice(0, 6) %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">{{ covoiturage.lieuDepart }}</h5>
+                                <i class="bi bi-arrow-down text-muted"></i>
+                                <h5 class="card-title">{{ covoiturage.lieuArrivee }}</h5>
+                            </div>
+                            <span class="badge bg-success">{{ covoiturage.prixPersonne }}€</span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-muted small">
+                                <i class="bi bi-calendar"></i> {{ covoiturage.dateDepart|date('d/m/Y') }} à {{ covoiturage.heureDepart|date('H:i') }}
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-people"></i> {{ covoiturage.nbPlace }} place(s) disponible(s)
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Par {{ covoiturage.voiture.utilisateur.pseudo }}
+                            </small>
+                            <a href="{{ path('covoiturage_show', {'id': covoiturage.id}) }}" class="btn btn-sm btn-outline-primary">
+                                Voir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center">
+            <a href="{{ path('covoiturage_index') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-search"></i> Voir tous les covoiturages
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-4">Prêt à commencer votre aventure ?</h2>
+        <p class="lead mb-4">
+            Rejoignez des milliers d'utilisateurs qui font confiance à EcoRide
+            pour leurs déplacements quotidiens.
+        </p>
+        {% if not app.user %}
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="{{ path('app_register') }}" class="btn btn-light btn-lg px-4 me-md-2">
+                <i class="bi bi-person-plus"></i> Créer mon compte
+            </a>
+            <a href="{{ path('app_login') }}" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-box-arrow-in-right"></i> Me connecter
+            </a>
+        </div>
+        {% else %}
+        <a href="{{ path('covoiturage_index') }}" class="btn btn-light btn-lg px-4">
+            <i class="bi bi-search"></i> Explorer les trajets
+        </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

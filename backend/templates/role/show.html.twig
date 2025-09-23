@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rôle: {{ role.libelle }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <i class="bi bi-person-gear"></i> {{ role.libelle }}
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>ID:</strong> {{ role.id }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Date de création:</strong> {{ role.dateCreation|date('d/m/Y H:i:s') }}
+                    </div>
+                </div>
+
+                <h4>Utilisateurs avec ce rôle ({{ role.utilisateurs|length }})</h4>
+                {% if role.utilisateurs|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Email</th>
+                                <th>Date d'inscription</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for utilisateur in role.utilisateurs %}
+                            <tr>
+                                <td>
+                                    <strong>{{ utilisateur.pseudo }}</strong><br>
+                                    <small class="text-muted">{{ utilisateur.prenom }} {{ utilisateur.nom }}</small>
+                                </td>
+                                <td>{{ utilisateur.email }}</td>
+                                <td>{{ utilisateur.dateCreation|date('d/m/Y') }}</td>
+                                <td>
+                                    <form method="post" action="{{ path('admin_role_remove_user', {'id': role.id, 'userId': utilisateur.id}) }}"
+                                          style="display: inline;" onsubmit="return confirm('Retirer ce rôle à cet utilisateur ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('remove_user' ~ utilisateur.id) }}">
+                                        <button class="btn btn-sm btn-outline-danger" title="Retirer le rôle">
+                                            <i class="bi bi-person-dash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> Aucun utilisateur n'a ce rôle actuellement.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Actions</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ path('admin_role_edit', {'id': role.id}) }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Modifier le rôle
+                    </a>
+                    <a href="{{ path('admin_role_assign', {'id': role.id}) }}" class="btn btn-success">
+                        <i class="bi bi-person-plus"></i> Assigner le rôle
+                    </a>
+                    <a href="{{ path('admin_role_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="mb-0">Statistiques</h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-12">
+                        <h2 class="text-primary">{{ role.utilisateurs|length }}</h2>
+                        <p class="text-muted">Utilisateur(s) avec ce rôle</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

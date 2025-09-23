@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Rôle{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <i class="bi bi-plus-circle"></i> Nouveau Rôle
+                </h2>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'true'}}) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.libelle, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.libelle) }}
+                    <div class="form-text">
+                        Exemples : ROLE_ADMIN, ROLE_MODERATOR, ROLE_PREMIUM
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ path('admin_role_index') }}" class="btn btn-secondary me-md-2">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">Rôles existants</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for role in existing_roles %}
+                    <div class="col-md-4 mb-2">
+                        <span class="badge bg-secondary">{{ role.libelle }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

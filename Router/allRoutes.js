@@ -22,7 +22,7 @@ export const allRoutes = [
     new Route("/signup","Inscription","/pages/signup.html", ["disconnected"], "/js/auth/signup.js"),
     new Route("/account","Mon Profil","/pages/account.html", ["user", "employee", "admin"], "/js/auth/account.js"),
     new Route("/trajet/nouveau", "Proposer un Trajet", "/pages/trajet_new.html", ["driver", "both"], "/js/trajet_new.js"),
-    new Route("/editPassword","Modifier mon mot de passe", ["user", "employee", "admin"],"/pages/editPassword.html"),
+    new Route("/editPassword","Modifier mon mot de passe", "/pages/editPassword.html", ["user", "employee", "admin"]),
     new Route("/employe/avis", "Modération Avis", "/pages/admin/avis_moderation.html", ["employee", "admin"], "/js/admin/avis_moderation.js"),
     new Route("/admin/dashboard", "Dashboard Admin", "/pages/admin/dashboard.html", ["admin"], "/js/admin/dashboard.js"),
 ];

@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-people"></i> Gestion des Utilisateurs
+                {% if utilisateurs|length > 0 %}
+                    <span class="badge bg-primary ms-2">{{ utilisateurs|length }}</span>
+                {% endif %}
+            </h1>
+            <div class="btn-group" role="group">
+                <a href="{{ path('utilisateur_new') }}" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Nouvel Utilisateur
+                </a>
+                <a href="{{ path('api_utilisateur_index') }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-code"></i> API
+                </a>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="role" class="form-label">Rôle</label>
+                        <select name="role" id="role" class="form-select">
+                            <option value="">Tous les rôles</option>
+                            <option value="ROLE_ADMIN" {{ app.request.query.get('role') == 'ROLE_ADMIN' ? 'selected' : '' }}>Administrateur</option>
+                            <option value="ROLE_USER" {{ app.request.query.get('role') == 'ROLE_USER' ? 'selected' : '' }}>Utilisateur</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="actif" class="form-label">Statut</label>
+                        <select name="actif" id="actif" class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="1" {{ app.request.query.get('actif') == '1' ? 'selected' : '' }}>Actif</option>
+                            <option value="0" {{ app.request.query.get('actif') == '0' ? 'selected' : '' }}>Inactif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">Recherche</label>
+                        <input type="text" name="search" id="search" class="form-control"
+                               value="{{ app.request.query.get('search') }}" placeholder="Nom, prénom, email...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Utilisateur</th>
+                                <th>Contact</th>
+                                <th>Rôles</th>
+                                <th>Statut</th>
+                                <th>Inscription</th>
+                                <th>Activité</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for utilisateur in utilisateurs %}
+                                <tr>
+                                    <td>{{ utilisateur.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 40px; height: 40px;">
+                                                {{ utilisateur.prenom|first|upper }}{{ utilisateur.nom|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong>{{ utilisateur.pseudo }}</strong><br>
+                                                <small class="text-muted">{{ utilisateur.prenom }} {{ utilisateur.nom }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>{{ utilisateur.email }}</div>
+                                        {% if utilisateur.telephone %}
+                                        <small class="text-muted">{{ utilisateur.telephone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for role in utilisateur.rolesCollection %}
+                                        <span class="badge bg-secondary me-1">{{ role.libelle }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        {% if utilisateur.actif %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle"></i> Inactif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>{{ utilisateur.dateCreation|date('d/m/Y') }}</div>
+                                        <small class="text-muted">{{ utilisateur.dateCreation|date('H:i') }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="small">
+                                            <div><i class="bi bi-car-front"></i> {{ utilisateur.voitures|length }} véhicule(s)</div>
+                                            <div><i class="bi bi-car-front"></i> {{ utilisateur.covoiturages|length }} covoiturage(s)</div>
+                                            <div><i class="bi bi-star"></i> {{ utilisateur.avisDonnes|length }} avis</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('utilisateur_show', {'id': utilisateur.id}) }}"
+                                               class="btn btn-sm btn-outline-primary" title="Voir">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('utilisateur_edit', {'id': utilisateur.id}) }}"
+                                               class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% if utilisateur.id != app.user.id %}
+                                            <form method="post" action="{{ path('utilisateur_delete', {'id': utilisateur.id}) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ utilisateur.id) }}">
+                                                <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="bi bi-people display-4 mb-3"></i><br>
+                                        <strong>Aucun utilisateur trouvé</strong><br>
+                                        <small>Créez votre premier utilisateur pour commencer !</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -164,7 +164,8 @@ window.ecoRideSignupPage.handleSubmit = async function(event) {
 
          // --- Appel API ---
          try {
-             const apiUrl = 'https://127.0.0.1:8000/api/register';
+             // Utilisation d'une URL relative pour éviter les problèmes CORS et HTTPS
+             const apiUrl = '/api/register';
              console.log(`handleSubmit: Envoi requête POST vers ${apiUrl}`);
 
              const response = await fetch(apiUrl, {

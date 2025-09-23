@@ -28,8 +28,8 @@ window.ecoRideSigninPage.handleLogin = async function(event) {
 
     // --- Appel API Backend ---
     try {
-        // Adapte cette URL si ton API Symfony tourne ailleurs
-        const apiUrl = 'https://127.0.0.1:8000/api/login_check';
+        // Utilisation d'une URL relative pour éviter les problèmes CORS
+        const apiUrl = '/api/login_check';
         console.log(`Envoi requête POST vers ${apiUrl}`);
 
         const response = await fetch(apiUrl, {

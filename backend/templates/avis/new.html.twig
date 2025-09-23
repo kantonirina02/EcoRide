@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Avis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Laisser un avis</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Covoiturage :</strong> {{ covoiturage.lieuDepart }} → {{ covoiturage.lieuArrivee }}<br>
+                    <strong>Conducteur :</strong> {{ covoiturage.voiture.utilisateur.pseudo }}
+                </div>
+
+                {{ form_start(form) }}
+                    <div class="mb-3">
+                        <label class="form-label">Note :</label>
+                        <div class="rating-input">
+                            {% for i in 1..5 %}
+                                <input type="radio" id="star{{ i }}" name="avis[note]" value="{{ i }}"
+                                       {% if form.note.vars.value == i %}checked{% endif %}>
+                                <label for="star{{ i }}" class="star">
+                                    <i class="bi bi-star{% if i <= form.note.vars.value %}-fill text-warning{% else %}-empty text-muted{% endif %}"></i>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {{ form_errors(form.note) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_row(form.commentaire) }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('covoiturage_show', {'id': covoiturage.id}) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Publier l'avis
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+}
+
+.rating-input input {
+    display: none;
+}
+
+.rating-input label {
+    cursor: pointer;
+    font-size: 2rem;
+    margin: 0 0.1rem;
+}
+
+.rating-input label:hover ~ label .bi-star-empty,
+.rating-input input:checked ~ label .bi-star-empty {
+    color: #ffc107;
+}
+
+.rating-input input:checked + label .bi-star-fill {
+    color: #ffc107;
+}
+</style>
+{% endblock %}

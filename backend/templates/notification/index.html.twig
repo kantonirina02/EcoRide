@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-bell"></i> Mes Notifications
+                {% if notifications|length > 0 %}
+                    <span class="badge bg-primary ms-2">{{ notifications|length }}</span>
+                {% endif %}
+            </h1>
+            <div class="btn-group" role="group">
+                <a href="{{ path('api_notification_list', {'unread': 1}) }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-bell"></i> API JSON
+                </a>
+                {% if notifications|filter(n => not n.lu)|length > 0 %}
+                <form method="post" action="{{ path('api_notification_mark_all_read') }}" style="display: inline;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('mark_all_read') }}">
+                    <button type="submit" class="btn btn-success" onclick="return confirm('Marquer toutes les notifications comme lues ?')">
+                        <i class="bi bi-check-all"></i> Tout marquer comme lu
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if notifications|length > 0 %}
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for notification in notifications %}
+                    <div class="list-group-item {% if not notification.lu %}border-start border-primary border-5{% endif %}">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="mb-0 me-2">{{ notification.titre }}</h6>
+                                    {% if not notification.lu %}
+                                        <span class="badge bg-primary">Nouveau</span>
+                                    {% endif %}
+                                    <small class="text-muted ms-auto">
+                                        {{ notification.dateCreation|date('d/m/Y H:i') }}
+                                    </small>
+                                </div>
+                                <p class="mb-2">{{ notification.message }}</p>
+                                {% if notification.data %}
+                                <div class="text-muted small">
+                                    <i class="bi bi-info-circle"></i> Données: {{ notification.data|json_encode }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="btn-group ms-3" role="group">
+                                {% if not notification.lu %}
+                                <form method="post" action="{{ path('api_notification_mark_read', {'id': notification.id}) }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('mark_read' ~ notification.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Marquer comme lu">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <form method="post" action="{{ path('api_notification_delete', {'id': notification.id}) }}" style="display: inline;"
+                                      onsubmit="return confirm('Supprimer cette notification ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ notification.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-bell-slash display-4 text-muted mb-3"></i>
+                <h3 class="text-muted">Aucune notification</h3>
+                <p class="text-muted">Vous n'avez aucune notification pour le moment.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Actualiser automatiquement les notifications toutes les 30 secondes
+    setInterval(function() {
+        fetch('{{ path('api_notification_unread_count') }}')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.navbar .badge');
+                if (badge) {
+                    if (data.unread_count > 0) {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => console.error('Erreur lors de la mise à jour des notifications:', error));
+    }, 30000);
+});
+</script>
+{% endblock %}

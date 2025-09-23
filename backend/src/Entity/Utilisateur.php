@@ -10,8 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
-// --- Modification Import Validator ---
-// Importe directement l'alias Assert
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
@@ -25,23 +23,20 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 50)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\NotBlank] // Utilisation directe via l'alias
+    #[Assert\NotBlank]
     private ?string $nom = null;
 
     #[ORM\Column(length: 50)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\NotBlank] // Utilisation directe via l'alias
+    #[Assert\NotBlank]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\NotBlank] // Utilisation directe via l'alias
-    #[Assert\Email]    // Utilisation directe via l'alias
+    #[Assert\NotBlank]
+    #[Assert\Email]
     private ?string $email = null;
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column(length: 255)]
     #[Groups(['user:write'])]
     private ?string $password = null;
@@ -64,45 +59,33 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 50, unique: true)]
     #[Groups(['user:read', 'user:write'])]
-    #[Assert\NotBlank] // Utilisation directe via l'alias
+    #[Assert\NotBlank]
     private ?string $pseudo = null;
 
-    /**
-     * @var Collection<int, Role>
-     */
-    // Vérifie le 'inversedBy' dans ton entité Role si la relation est bidirectionnelle
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'utilisateurs')]
     #[Groups(['user:read', 'user:write'])]
-    private Collection $roles; 
+    private Collection $roles;
 
-    /**
-     * @var Collection<int, Voiture>
-     */
-    // J'utilise 'proprietaire' ici, adapte si c'est 'utilisateur' dans Voiture.php
-    #[ORM\OneToMany(targetEntity: Voiture::class, mappedBy: 'proprietaire', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Voiture::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     #[Groups(['user:read'])]
     private Collection $voitures;
 
-    /**
-     * @var Collection<int, Covoiturage>
-     */
-    // Vérifie 'passagers' dans Covoiturage.php
-    #[ORM\ManyToMany(targetEntity: Covoiturage::class, mappedBy: 'passagers')]
+    #[ORM\ManyToMany(targetEntity: Covoiturage::class, mappedBy: 'passengers')]
     #[Groups(['user:read'])]
     private Collection $participations;
 
-    /**
-     * @var Collection<int, Avis>
-     */
-    // Vérifie 'auteur' dans Avis.php
     #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'auteur', orphanRemoval: true)]
     #[Groups(['user:read'])]
     private Collection $avisDonnes;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])] 
-    #[Groups(['user:read'])] 
-    #[Assert\PositiveOrZero] 
-    private ?int $credits = 0; 
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'destinataire', orphanRemoval: true)]
+    #[Groups(['user:read'])]
+    private Collection $notificationsRecues;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[Groups(['user:read'])]
+    #[Assert\PositiveOrZero]
+    private ?int $credits = 0;
 
     public function __construct()
     {
@@ -110,10 +93,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->voitures = new ArrayCollection();
         $this->participations = new ArrayCollection();
         $this->avisDonnes = new ArrayCollection();
+        $this->notificationsRecues = new ArrayCollection();
         $this->credits = 20;
     }
-
-    // --- Getters et Setters (inchangés pour les propriétés simples) ---
 
     public function getId(): ?int { return $this->id; }
     public function getNom(): ?string { return $this->nom; }
@@ -134,111 +116,97 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
     public function getPseudo(): ?string { return $this->pseudo; }
     public function setPseudo(?string $pseudo): static { $this->pseudo = $pseudo; return $this; }
-    public function getCredits(): ?int{return $this->credits;}
-    public function setCredits(int $credits): static{$this->credits = $credits;return $this;}
+    public function getCredits(): ?int { return $this->credits; }
+    public function setCredits(int $credits): static { $this->credits = $credits; return $this; }
 
     public function addCredits(int $amount): static
-     {
-         if ($amount > 0) {
-             $this->credits += $amount;
-         }
-         return $this;
-     }
-     public function removeCredits(int $amount): bool // Retourne true si succès
-     {
-         if ($amount > 0 && $this->credits >= $amount) {
-             $this->credits -= $amount;
-             return true;
-         }
-         return false;
-     }
-    // --- Méthodes UserInterface ---
+    {
+        if ($amount > 0) {
+            $this->credits += $amount;
+        }
+        return $this;
+    }
+
+    public function removeCredits(int $amount): bool
+    {
+        if ($amount > 0 && $this->credits >= $amount) {
+            $this->credits -= $amount;
+            return true;
+        }
+        return false;
+    }
 
     public function getUserIdentifier(): string { return (string) $this->email; }
 
     public function getRoles(): array
     {
-        // --- Correction ici ---
-        // Hypothèse : La méthode dans Role s'appelle getLibelle()
-        // VÉRIFIE LE VRAI NOM DANS Role.php !
         $rolesStrings = $this->roles->map(fn(Role $role) => $role->getLibelle())->toArray();
         $rolesStrings[] = 'ROLE_USER';
         return array_unique($rolesStrings);
     }
 
-    public function eraseCredentials(): void { /* $this->plainPassword = null; */ }
+    public function eraseCredentials(): void {}
 
-    // --- Gestion Collections ---
-
-    /** @return Collection<int, Role> */
     public function getRolesCollection(): Collection { return $this->roles; }
-    public function addRole(Role $role): static { if (!$this->roles->contains($role)) { $this->roles->add($role); } return $this; }
-    public function removeRole(Role $role): static { $this->roles->removeElement($role); return $this; }
+    public function addRole(Role $role): static
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
+        return $this;
+    }
+    public function removeRole(Role $role): static
+    {
+        $this->roles->removeElement($role);
+        return $this;
+    }
 
-    /** @return Collection<int, Voiture> */
     public function getVoitures(): Collection { return $this->voitures; }
 
     public function addVoiture(Voiture $voiture): static
     {
         if (!$this->voitures->contains($voiture)) {
             $this->voitures->add($voiture);
-            // --- Correction ici ---
-            // Hypothèse : La méthode dans Voiture s'appelle setProprietaire()
-            // VÉRIFIE LE VRAI NOM DANS Voiture.php ! (Probablement setUtilisateur ?)
-            $voiture->setProprietaire($this);
+            $voiture->setUtilisateur($this);
         }
         return $this;
     }
 
     public function removeVoiture(Voiture $voiture): static
     {
-        // --- Correction ici ---
-        // Hypothèse : La méthode dans Voiture s'appelle getProprietaire() et setProprietaire()
-        // VÉRIFIE LES VRAIS NOMS DANS Voiture.php ! (Probablement getUtilisateur/setUtilisateur ?)
         if ($this->voitures->removeElement($voiture)) {
-            if ($voiture->getProprietaire() === $this) {
-                $voiture->setProprietaire(null);
+            if ($voiture->getUtilisateur() === $this) {
+                $voiture->setUtilisateur(null);
             }
         }
         return $this;
     }
 
-    /** @return Collection<int, Covoiturage> */
     public function getParticipations(): Collection { return $this->participations; }
 
     public function addParticipation(Covoiturage $participation): static
     {
         if (!$this->participations->contains($participation)) {
             $this->participations->add($participation);
-             // --- Correction ici ---
-            // Hypothèse : La méthode dans Covoiturage s'appelle addPassager()
-            // VÉRIFIE LE VRAI NOM DANS Covoiturage.php !
-            $participation->addPassager($this);
+            $participation->addPassenger($this);
         }
         return $this;
     }
 
     public function removeParticipation(Covoiturage $participation): static
     {
-         // --- Correction ici ---
-        // Hypothèse : La méthode dans Covoiturage s'appelle removePassager()
-        // VÉRIFIE LE VRAI NOM DANS Covoiturage.php !
         if ($this->participations->removeElement($participation)) {
-            $participation->removePassager($this);
+            $participation->removePassenger($this);
         }
         return $this;
     }
 
-    /** @return Collection<int, Avis> */
     public function getAvisDonnes(): Collection { return $this->avisDonnes; }
 
     public function addAvisDonne(Avis $avisDonne): static
     {
         if (!$this->avisDonnes->contains($avisDonne)) {
             $this->avisDonnes->add($avisDonne);
-             // --- Correction ici ---
-            // Hypothèse : La méthode dans Avis s'appelle setAuteur()
-            // VÉRIFIE LE VRAI NOM DANS Avis.php !
             $avisDonne->setAuteur($this);
         }
         return $this;
@@ -246,12 +214,33 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeAvisDonne(Avis $avisDonne): static
     {
-         // --- Correction ici ---
-        // Hypothèse : La méthode dans Avis s'appelle getAuteur() et setAuteur()
-        // VÉRIFIE LES VRAIS NOMS DANS Avis.php !
         if ($this->avisDonnes->removeElement($avisDonne)) {
             if ($avisDonne->getAuteur() === $this) {
                 $avisDonne->setAuteur(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getNotificationsRecues(): Collection
+    {
+        return $this->notificationsRecues;
+    }
+
+    public function addNotificationRecue(Notification $notification): static
+    {
+        if (!$this->notificationsRecues->contains($notification)) {
+            $this->notificationsRecues->add($notification);
+            $notification->setDestinataire($this);
+        }
+        return $this;
+    }
+
+    public function removeNotificationRecue(Notification $notification): static
+    {
+        if ($this->notificationsRecues->removeElement($notification)) {
+            if ($notification->getDestinataire() === $this) {
+                $notification->setDestinataire(null);
             }
         }
         return $this;

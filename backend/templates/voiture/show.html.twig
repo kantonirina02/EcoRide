@@ -1,0 +1,116 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Véhicule - {{ voiture.marque.libelle }} {{ voiture.modele }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ voiture.marque.libelle }} {{ voiture.modele }}</h1>
+            <div>
+                <a href="{{ path('voiture_edit', {'id': voiture.id}) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <a href="{{ path('voiture_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Détails du véhicule</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Marque :</strong> {{ voiture.marque.libelle }}</p>
+                                <p><strong>Modèle :</strong> {{ voiture.modele }}</p>
+                                <p><strong>Couleur :</strong>
+                                    <span class="badge" style="background-color: {{ voiture.couleur }}; color: white;">
+                                        {{ voiture.couleur }}
+                                    </span>
+                                </p>
+                                <p><strong>Énergie :</strong> {{ voiture.energie ?: 'Non renseignée' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Immatriculation :</strong> {{ voiture.immatriculation }}</p>
+                                <p><strong>Nombre de places :</strong> {{ voiture.nbPlace }}</p>
+                                <p><strong>Propriétaire :</strong> {{ voiture.utilisateur.pseudo }}</p>
+                                <p><strong>Email propriétaire :</strong> {{ voiture.utilisateur.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3>Covoiturages associés</h3>
+                    </div>
+                    <div class="card-body">
+                        {% if voiture.covoiturages is not empty %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Départ</th>
+                                            <th>Arrivée</th>
+                                            <th>Date</th>
+                                            <th>Places</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for covoiturage in voiture.covoiturages %}
+                                            <tr>
+                                                <td>{{ covoiturage.lieuDepart }}</td>
+                                                <td>{{ covoiturage.lieuArrivee }}</td>
+                                                <td>{{ covoiturage.dateDepart|date('d/m/Y') }}</td>
+                                                <td>{{ covoiturage.nbPlace }}</td>
+                                                <td>
+                                                    {% if covoiturage.status == 'disponible' %}
+                                                        <span class="badge bg-success">Disponible</span>
+                                                    {% elseif covoiturage.status == 'complet' %}
+                                                        <span class="badge bg-warning">Complet</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">{{ covoiturage.status }}</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Aucun covoiturage associé à ce véhicule.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{ path('covoiturage_new') }}" class="btn btn-success w-100 mb-2">
+                            <i class="bi bi-plus-circle"></i> Créer un covoiturage
+                        </a>
+
+                        <form method="post" action="{{ path('voiture_delete', {'id': voiture.id}) }}"
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ voiture.id) }}">
+                            <button class="btn btn-danger w-100">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

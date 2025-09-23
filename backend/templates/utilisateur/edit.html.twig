@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Utilisateur - {{ utilisateur.pseudo }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Modifier l'utilisateur {{ utilisateur.pseudo }}</h2>
+            </div>
+            <div class="card-body">
+                {{ form_start(form) }}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.nom) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.prenom) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.pseudo) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.email) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.telephone) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.adresse) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.dateNaissance) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_row(form.photo) }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_row(form.plainPassword, {
+                            'required': false,
+                            'help': 'Laissez vide pour garder le mot de passe actuel'
+                        }) }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_row(form.roles) }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('utilisateur_show', {'id': utilisateur.id}) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Retour
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Enregistrer
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

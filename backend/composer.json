@@ -29,6 +29,7 @@
         "symfony/yaml": "7.2.*"
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
         "symfony/debug-bundle": "7.2.*",
         "symfony/maker-bundle": "^1.62"
     },

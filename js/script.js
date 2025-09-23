@@ -51,9 +51,12 @@ function getRole(){
 }
 
 function isConnected() {
-    const connected = getToken() != null;
-    return connected;
+    return getToken() !== null;
 }
+
+// Exposer les fonctions au niveau global pour le routeur
+window.isConnected = isConnected;
+window.getRole = getRole;
 
 function signout(){
     console.log("Appel signout");
@@ -102,6 +105,55 @@ function addUserCredits(amountToAdd) {
     return false;
 }
 
+// --- Gestion Affichage Conditionnel ---
+function showAndHideElementsForRoles() {
+    console.log("Exécution de showAndHideElementsForRoles");
+    const userConnected = isConnected();
+    const userRole = getRole();
+    
+    console.log(`État utilisateur: connecté=${userConnected}, rôle=${userRole}`);
+    
+    // Éléments pour utilisateurs connectés
+    const connectedElements = document.querySelectorAll('[data-show-connected]');
+    connectedElements.forEach(el => {
+        el.style.display = userConnected ? '' : 'none';
+    });
+    
+    // Éléments pour utilisateurs déconnectés
+    const disconnectedElements = document.querySelectorAll('[data-show-disconnected]');
+    disconnectedElements.forEach(el => {
+        el.style.display = !userConnected ? '' : 'none';
+    });
+    
+    // Éléments spécifiques à certains rôles
+    const roleElements = document.querySelectorAll('[data-show-role]');
+    roleElements.forEach(el => {
+        const roles = el.getAttribute('data-show-role').split(',');
+        el.style.display = (userConnected && roles.includes(userRole)) ? '' : 'none';
+    });
+    
+    // Support pour l'attribut data-show (ancienne méthode)
+    document.querySelectorAll('[data-show]').forEach(element => {
+        const showCondition = element.dataset.show;
+        let shouldBeVisible = false;
+        switch(showCondition){
+            case 'disconnected': shouldBeVisible = !userConnected; break;
+            case 'connected': shouldBeVisible = userConnected; break;
+            case 'admin': shouldBeVisible = userConnected && userRole === 'admin'; break;
+            // Gérer plusieurs rôles dans data-show (ex: "employee admin")
+            default:
+                const rolesAllowed = showCondition.split(/[\s,]+/); 
+                if(userConnected && rolesAllowed.includes(userRole)){
+                    shouldBeVisible = true;
+                }
+                break;
+        }
+        element.classList.toggle('d-none', !shouldBeVisible);
+    });
+    
+    console.log("<- Fin showAndHideElementsForRoles");
+}
+
 function deductUserCredits(amountToDeduct) {
     const currentCredits = getUserCredits(); // Lecture de la valeur actuelle
     if (typeof amountToDeduct === 'number' && amountToDeduct > 0 && currentCredits >= amountToDeduct) {
@@ -114,50 +166,31 @@ function deductUserCredits(amountToDeduct) {
 }
 
 
-// --- Gestion Affichage Conditionnel ---
-function showAndHideElementsForRoles(){
-    const userConnected = isConnected(); 
-    const role = userConnected ? getRole() : 'disconnected'; 
-    console.log(`showAndHide: Status -> connected=${userConnected}, role=${role}`);
-
-    document.querySelectorAll('[data-show]').forEach(element => {
-        const showCondition = element.dataset.show;
-        let shouldBeVisible = false;
-        switch(showCondition){
-            case 'disconnected': shouldBeVisible = !userConnected; break;
-            case 'connected': shouldBeVisible = userConnected; break;
-            case 'admin': shouldBeVisible = userConnected && role === 'admin'; break;
-            // Gérer plusieurs rôles dans data-show (ex: "employee admin")
-            default:
-                const rolesAllowed = showCondition.split(/[\s,]+/); 
-                if(userConnected && rolesAllowed.includes(role)){
-                    shouldBeVisible = true;
-                }
-                break;
-        }
-        element.classList.toggle('d-none', !shouldBeVisible);
-    });
-    console.log("<- Fin showAndHideElementsForRoles");
-}
-
-
 // --- Initialisation Globale et Écouteurs ---
 function initializeGlobalElements() {
     console.log("Initialisation des éléments globaux (script.js)...");
     
-    window.getUserCredits(); // Vérifie/Initialise les crédits
+    // Vérifie/Initialise les crédits
+    getUserCredits();
     console.log("Vérification/Initialisation des crédits effectuée.");
-    window.showAndHideElementsForRoles(); 
+    
+    // Mise à jour de l'affichage selon les rôles
+    showAndHideElementsForRoles(); 
     console.log("Affichage initial des rôles mis à jour.");
 
     // Attacher l'écouteur au bouton de déconnexion
     const signoutButton = document.getElementById("signout-btn");
     if (signoutButton && !signoutButton.hasAttribute('data-listener-attached')) {
-        signoutButton.addEventListener("click", signout); 
+        signoutButton.addEventListener("click", function() {
+            // Fonction de déconnexion
+            eraseCookie(tokenCookieName);
+            eraseCookie(RoleCookieName);
+            console.log("Déconnexion effectuée");
+            // Redirection vers la page d'accueil
+            window.location.href = "/";
+        }); 
         signoutButton.setAttribute('data-listener-attached', 'true');
         console.log("Écouteur ajouté au bouton de déconnexion.");
-    } else if (!signoutButton) {
-       
     }
 }
 
@@ -178,4 +211,4 @@ window.showAndHideElementsForRoles = showAndHideElementsForRoles;
 
 console.log("script.js : Fonctions globales exposées sur window.");
 
-console.log("Fin exécution script.js"); 
+console.log("Fin exécution script.js");

@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier: {{ role.libelle }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">
+                    <i class="bi bi-pencil"></i> Modifier le rôle
+                </h2>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'true'}}) }}
+
+                <div class="mb-3">
+                    {{ form_label(form.libelle, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.libelle, {'attr': {'class': 'form-control' ~ (form.libelle.vars.errors|length > 0 ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.libelle) }}
+                    <div class="form-text">
+                        Libellé actuel : <strong>{{ role.libelle }}</strong>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ path('admin_role_show', {'id': role.id}) }}" class="btn btn-secondary me-md-2">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                    {{ form_widget(form.save, {'attr': {'class': 'btn btn-primary'}}) }}
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">Informations du rôle</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>ID:</strong> {{ role.id }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Date de création:</strong> {{ role.dateCreation|date('d/m/Y H:i:s') }}
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <strong>Utilisateurs:</strong> {{ role.utilisateurs|length }} utilisateur(s)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

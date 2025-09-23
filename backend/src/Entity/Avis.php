@@ -3,8 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\AvisRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -22,23 +20,16 @@ class Avis
     #[ORM\Column]
     private ?int $note = null;
 
-    /**
-     * @var Collection<int, Utilisateur>
-     */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, inversedBy: 'avisDonnes')]
-    private Collection $auteur;
+    #[ORM\ManyToOne(inversedBy: 'avisDonnes')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Utilisateur $auteur = null;
 
     #[ORM\ManyToOne(inversedBy: 'avisRecus')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Covoiturage $covoiturage = null;
 
     #[ORM\Column(length: 50)]
     private ?string $statut = null;
-
-    public function __construct()
-    {
-        $this->auteur = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -69,26 +60,14 @@ class Avis
         return $this;
     }
 
-    /**
-     * @return Collection<int, Utilisateur>
-     */
-    public function getAuteur(): Collection
+    public function getAuteur(): ?Utilisateur
     {
         return $this->auteur;
     }
 
-    public function addAuteur(Utilisateur $auteur): static
+    public function setAuteur(?Utilisateur $auteur): static
     {
-        if (!$this->auteur->contains($auteur)) {
-            $this->auteur->add($auteur);
-        }
-
-        return $this;
-    }
-
-    public function removeAuteur(Utilisateur $auteur): static
-    {
-        $this->auteur->removeElement($auteur);
+        $this->auteur = $auteur;
 
         return $this;
     }

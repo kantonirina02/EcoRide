@@ -1,0 +1,18 @@
+{
+    "port": 8080,
+    "host": "0.0.0.0",
+    "root": ".",
+    "open": true,
+    "file": "index.html",
+    "middleware": ["./live-server-middleware.js"],
+    "injectBody": true,
+    "historyApiFallback": {
+        "index": "/index.html",
+        "disableDotRule": true
+    },
+    "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+    }
+}

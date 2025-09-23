@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Administrateur{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="mb-4">Dashboard Administrateur</h1>
+
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Utilisateurs</h5>
+                        <h2 class="text-primary">{{ stats.utilisateurs ?? 0 }}</h2>
+                        <a href="{{ path('utilisateur_index') }}" class="btn btn-sm btn-outline-primary">Gérer</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Covoiturages</h5>
+                        <h2 class="text-success">{{ stats.covoiturages ?? 0 }}</h2>
+                        <a href="#" class="btn btn-sm btn-outline-success">Voir</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Véhicules</h5>
+                        <h2 class="text-info">{{ stats.voitures ?? 0 }}</h2>
+                        <a href="#" class="btn btn-sm btn-outline-info">Gérer</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Avis</h5>
+                        <h2 class="text-warning">{{ stats.avis ?? 0 }}</h2>
+                        <a href="#" class="btn btn-sm btn-outline-warning">Modérer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions rapides -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Actions rapides</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('utilisateur_new') }}" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Ajouter un utilisateur
+                            </a>
+                            <a href="#" class="btn btn-success">
+                                <i class="bi bi-car-front"></i> Gérer les covoiturages
+                            </a>
+                            <a href="#" class="btn btn-info">
+                                <i class="bi bi-gear"></i> Configuration système
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Activité récente</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Nouvelle inscription</h6>
+                                    <small>Il y a 2h</small>
+                                </div>
+                                <p class="mb-1">Utilisateur "testuser" s'est inscrit</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Nouveau covoiturage</h6>
+                                    <small>Il y a 4h</small>
+                                </div>
+                                <p class="mb-1">Covoiturage Paris → Lyon créé</p>
+                            </div>
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">Avis modéré</h6>
+                                    <small>Il y a 6h</small>
+                                </div>
+                                <p class="mb-1">Avis signalé a été approuvé</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques (placeholder) -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Activité du mois</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Graphique d'activité (exemple avec Chart.js)
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Inscriptions',
+                data: [12, 19, 3, 5, 2, 3],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }, {
+                label: 'Covoiturages',
+                data: [2, 3, 20, 5, 1, 10],
+                borderColor: 'rgb(255, 99, 132)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

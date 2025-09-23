@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assigner le rôle: {{ role.libelle }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-person-plus"></i> Assigner le rôle: {{ role.libelle }}
+            </h1>
+            <a href="{{ path('admin_role_show', {'id': role.id}) }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour au rôle
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Utilisateurs disponibles</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ path('admin_role_assign', {'id': role.id}) }}">
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">Sélectionner un utilisateur</label>
+                        <select name="user_id" id="user_id" class="form-select" required>
+                            <option value="">Choisir un utilisateur...</option>
+                            {% for utilisateur in utilisateurs %}
+                            <option value="{{ utilisateur.id }}">
+                                {{ utilisateur.pseudo }} ({{ utilisateur.prenom }} {{ utilisateur.nom }}) - {{ utilisateur.email }}
+                                {% if utilisateur.rolesCollection.contains(role) %}
+                                    <strong>[DÉJÀ ASSIGNÉ]</strong>
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            {{ utilisateurs|length }} utilisateur(s) disponible(s)
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ path('admin_role_show', {'id': role.id}) }}" class="btn btn-secondary me-md-2">
+                            Annuler
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-person-plus"></i> Assigner le rôle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h3 class="mb-0">Utilisateurs actuels avec ce rôle ({{ role.utilisateurs|length }})</h3>
+            </div>
+            <div class="card-body">
+                {% if role.utilisateurs|length > 0 %}
+                <div class="row">
+                    {% for utilisateur in role.utilisateurs %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">{{ utilisateur.pseudo }}</h6>
+                                <p class="card-text text-muted">
+                                    {{ utilisateur.prenom }} {{ utilisateur.nom }}<br>
+                                    <small>{{ utilisateur.email }}</small>
+                                </p>
+                                <form method="post" action="{{ path('admin_role_remove_user', {'id': role.id, 'userId': utilisateur.id}) }}"
+                                      style="display: inline;" onsubmit="return confirm('Retirer ce rôle à cet utilisateur ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('remove_user' ~ utilisateur.id) }}">
+                                    <button class="btn btn-sm btn-outline-danger" title="Retirer le rôle">
+                                        <i class="bi bi-person-dash"></i> Retirer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> Aucun utilisateur n'a ce rôle actuellement.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('user_id');
+    const submitBtn = document.querySelector('button[type="submit"]');
+
+    select.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const alreadyAssigned = selectedOption.text.includes('[DÉJÀ ASSIGNÉ]');
+
+        if (alreadyAssigned) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('btn-warning');
+            submitBtn.classList.remove('btn-success');
+            submitBtn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Utilisateur déjà assigné';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('btn-warning');
+            submitBtn.classList.add('btn-success');
+            submitBtn.innerHTML = '<i class="bi bi-person-plus"></i> Assigner le rôle';
+        }
+    });
+});
+</script>
+{% endblock %}

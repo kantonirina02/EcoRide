@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Avis - {{ avis.auteur.pseudo }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Détail de l'avis</h2>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Auteur :</strong> {{ avis.auteur.pseudo }}</p>
+                        <p><strong>Covoiturage :</strong>
+                            {{ avis.covoiturage.lieuDepart }} → {{ avis.covoiturage.lieuArrivee }}
+                        </p>
+                        <p><strong>Date :</strong> {{ avis.dateCreation|date('d/m/Y H:i') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Note :</strong>
+                            <div>
+                                {% for i in 1..5 %}
+                                    <i class="bi bi-star{% if i <= avis.note %}-fill text-warning{% else %}-empty text-muted{% endif %}"></i>
+                                {% endfor %}
+                                <span class="ms-2">({{ avis.note }}/5)</span>
+                            </div>
+                        </p>
+                        <p><strong>Statut :</strong>
+                            {% if avis.statut == 'en_attente' %}
+                                <span class="badge bg-warning">En attente</span>
+                            {% elseif avis.statut == 'approuve' %}
+                                <span class="badge bg-success">Approuvé</span>
+                            {% elseif avis.statut == 'rejete' %}
+                                <span class="badge bg-danger">Rejeté</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ avis.statut }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if avis.commentaire %}
+                    <div class="mt-4">
+                        <h4>Commentaire :</h4>
+                        <div class="border p-3 bg-light rounded">
+                            {{ avis.commentaire|nl2br }}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <a href="{{ path('avis_index') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour à la liste
+                    </a>
+
+                    {% if avis.statut == 'en_attente' %}
+                        <div>
+                            <form method="post" action="{{ path('avis_approve', {'id': avis.id}) }}" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('approve' ~ avis.id) }}">
+                                <button class="btn btn-success me-2">
+                                    <i class="bi bi-check"></i> Approuver
+                                </button>
+                            </form>
+                            <form method="post" action="{{ path('avis_reject', {'id': avis.id}) }}" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('reject' ~ avis.id) }}">
+                                <button class="btn btn-danger">
+                                    <i class="bi bi-x"></i> Rejeter
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

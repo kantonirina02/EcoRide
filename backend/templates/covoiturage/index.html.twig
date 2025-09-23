@@ -1,0 +1,157 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Covoiturages{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="bi bi-car-front"></i> Gestion des Covoiturages
+                {% if covoiturages|length > 0 %}
+                    <span class="badge bg-primary ms-2">{{ covoiturages|length }}</span>
+                {% endif %}
+            </h1>
+            <div class="btn-group" role="group">
+                <a href="{{ path('covoiturage_new') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Nouveau Covoiturage
+                </a>
+                <a href="{{ path('api_covoiturage_index') }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="bi bi-code"></i> API
+                </a>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="status" class="form-label">Statut</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="disponible" {{ app.request.query.get('status') == 'disponible' ? 'selected' : '' }}>Disponible</option>
+                            <option value="complet" {{ app.request.query.get('status') == 'complet' ? 'selected' : '' }}>Complet</option>
+                            <option value="annule" {{ app.request.query.get('status') == 'annule' ? 'selected' : '' }}>Annulé</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lieu_depart" class="form-label">Lieu de départ</label>
+                        <input type="text" name="lieu_depart" id="lieu_depart" class="form-control"
+                               value="{{ app.request.query.get('lieu_depart') }}" placeholder="Paris, Lyon...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lieu_arrivee" class="form-label">Lieu d'arrivée</label>
+                        <input type="text" name="lieu_arrivee" id="lieu_arrivee" class="form-control"
+                               value="{{ app.request.query.get('lieu_arrivee') }}" placeholder="Paris, Lyon...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-search"></i> Filtrer
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Départ</th>
+                                <th>Arrivée</th>
+                                <th>Date/Heure</th>
+                                <th>Places</th>
+                                <th>Prix</th>
+                                <th>Statut</th>
+                                <th>Conducteur</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for covoiturage in covoiturages %}
+                                <tr>
+                                    <td>{{ covoiturage.id }}</td>
+                                    <td>
+                                        <strong>{{ covoiturage.lieuDepart }}</strong>
+                                    </td>
+                                    <td>
+                                        <strong>{{ covoiturage.lieuArrivee }}</strong>
+                                    </td>
+                                    <td>
+                                        <div>{{ covoiturage.dateDepart|date('d/m/Y') }}</div>
+                                        <small class="text-muted">{{ covoiturage.heureDepart|date('H:i') }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-people"></i> {{ covoiturage.nbPlace }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ covoiturage.prixPersonne }}€</span>
+                                    </td>
+                                    <td>
+                                        {% if covoiturage.status == 'disponible' %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle"></i> Disponible
+                                            </span>
+                                        {% elseif covoiturage.status == 'complet' %}
+                                            <span class="badge bg-warning">
+                                                <i class="bi bi-exclamation-triangle"></i> Complet
+                                            </span>
+                                        {% elseif covoiturage.status == 'annule' %}
+                                            <span class="badge bg-danger">
+                                                <i class="bi bi-x-circle"></i> Annulé
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ covoiturage.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div>{{ covoiturage.voiture.utilisateur.pseudo }}</div>
+                                        <small class="text-muted">{{ covoiturage.voiture.modele }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('covoiturage_show', {'id': covoiturage.id}) }}"
+                                               class="btn btn-sm btn-outline-primary" title="Voir">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('covoiturage_edit', {'id': covoiturage.id}) }}"
+                                               class="btn btn-sm btn-outline-secondary" title="Modifier">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('covoiturage_delete', {'id': covoiturage.id}) }}"
+                                                  style="display: inline;"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce covoiturage ?')">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ covoiturage.id) }}">
+                                                <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bi bi-car-front display-4 mb-3"></i><br>
+                                        <strong>Aucun covoiturage trouvé</strong><br>
+                                        <small>Créez votre premier covoiturage pour commencer !</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

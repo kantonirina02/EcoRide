@@ -21,7 +21,7 @@ class Role
     /**
      * @var Collection<int, Utilisateur>
      */
-    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'roles')] 
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'roles')]
     private Collection $utilisateurs;
 
     public function __construct()
@@ -54,24 +54,24 @@ class Role
         return $this->utilisateurs;
     }
 
-   // public function addUtilisateur(Utilisateur $utilisateur): static
-   // {
-    //    if (!$this->utilisateurs->contains($utilisateur)) {
-    //        $this->utilisateurs->add($utilisateur);
-    //        $utilisateur->addRole($this);
-    //    }
+    public function addUtilisateur(Utilisateur $utilisateur): static
+    {
+        if (!$this->utilisateurs->contains($utilisateur)) {
+            $this->utilisateurs->add($utilisateur);
+            $utilisateur->addRole($this);
+        }
 
-    //    return $this;
-   // }
+        return $this;
+    }
 
-    //public function removeUtilisateur(Utilisateur $utilisateur): static
-   // {
-   //     if ($this->utilisateurs->removeElement($utilisateur)) {
-     //       $utilisateur->removeRole($this);
-   //     }
+    public function removeUtilisateur(Utilisateur $utilisateur): static
+    {
+        if ($this->utilisateurs->removeElement($utilisateur)) {
+            $utilisateur->removeRole($this);
+        }
 
-   //     return $this;
-   // }
+        return $this;
+    }
 
    public function __toString(): string
     {

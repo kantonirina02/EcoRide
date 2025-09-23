@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - EcoRide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="../scss/main.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand" href="home.html">
+                <i class="bi bi-tree me-2"></i>EcoRide
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="trajet_search.html">
+                            <i class="bi bi-search me-1"></i>Rechercher
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="trajet_new.html">
+                            <i class="bi bi-plus-circle me-1"></i>Proposer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="covoiturages.html">
+                            <i class="bi bi-list me-1"></i>Mes Trajets
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle me-1"></i>Mon Compte
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" href="profil.html">
+                                <i class="bi bi-person me-2"></i>Mon Profil
+                            </a></li>
+                            <li><a class="dropdown-item" href="voitures.html">
+                                <i class="bi bi-car-front me-2"></i>Mes Voitures
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="signin.html">
+                                <i class="bi bi-box-arrow-right me-2"></i>Déconnexion
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="bg-light py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <h1 class="text-center mb-4">
+                        <i class="bi bi-person-circle text-success me-2"></i>
+                        Mon Profil
+                    </h1>
+                    <p class="text-center text-muted mb-5">
+                        Gérez vos informations personnelles et préférences
+                    </p>
+
+                    <!-- Onglets -->
+                    <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                                <i class="bi bi-person me-2"></i>Informations
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                                <i class="bi bi-shield-check me-2"></i>Sécurité
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                                <i class="bi bi-clock-history me-2"></i>Historique
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">
+                                <i class="bi bi-graph-up me-2"></i>Statistiques
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Contenu des onglets -->
+                    <div class="tab-content" id="profileTabsContent">
+                        <!-- Onglet Informations -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-lg-8">
+                                            <form id="profileForm">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label for="nom" class="form-label">Nom *</label>
+                                                        <input type="text" class="form-control" id="nom" name="nom" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="prenom" class="form-label">Prénom *</label>
+                                                        <input type="text" class="form-control" id="prenom" name="prenom" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="email" class="form-label">Email *</label>
+                                                        <input type="email" class="form-control" id="email" name="email" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="telephone" class="form-label">Téléphone</label>
+                                                        <input type="tel" class="form-control" id="telephone" name="telephone">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="dateNaissance" class="form-label">Date de naissance</label>
+                                                        <input type="date" class="form-control" id="dateNaissance" name="dateNaissance">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="pseudo" class="form-label">Pseudo *</label>
+                                                        <input type="text" class="form-control" id="pseudo" name="pseudo" required>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label for="adresse" class="form-label">Adresse</label>
+                                                        <textarea class="form-control" id="adresse" name="adresse" rows="2"></textarea>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label for="biographie" class="form-label">Biographie</label>
+                                                        <textarea class="form-control" id="biographie" name="biographie" rows="3" placeholder="Parlez-nous de vous..."></textarea>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <button type="submit" class="btn btn-success">
+                                                            <i class="bi bi-check-lg me-1"></i>Enregistrer les modifications
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="text-center">
+                                                <div class="avatar-container mb-3">
+                                                    <div class="avatar-large">
+                                                        <i class="bi bi-person-circle"></i>
+                                                    </div>
+                                                    <button class="btn btn-outline-primary btn-sm mt-2" onclick="changeAvatar()">
+                                                        <i class="bi bi-camera me-1"></i>Changer la photo
+                                                    </button>
+                                                </div>
+                                                <div class="card bg-light">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Informations du compte</h6>
+                                                        <p class="mb-1"><strong>Membre depuis:</strong> <span id="memberSince">Janvier 2024</span></p>
+                                                        <p class="mb-1"><strong>Dernière connexion:</strong> <span id="lastLogin">Aujourd'hui</span></p>
+                                                        <p class="mb-0"><strong>Statut:</strong> <span class="badge bg-success">Actif</span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onglet Sécurité -->
+                        <div class="tab-pane fade" id="security" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Modifier le mot de passe</h5>
+                                    <form id="passwordForm">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="currentPassword" class="form-label">Mot de passe actuel *</label>
+                                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="newPassword" class="form-label">Nouveau mot de passe *</label>
+                                                <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                                                <div class="form-text">
+                                                    Minimum 8 caractères, avec majuscules, minuscules et chiffres
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="confirmPassword" class="form-label">Confirmer le mot de passe *</label>
+                                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-warning">
+                                                    <i class="bi bi-key me-1"></i>Changer le mot de passe
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <hr class="my-4">
+
+                                    <h5 class="card-title mb-4">Préférences de sécurité</h5>
+                                    <form id="securityForm">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" name="emailNotifications" checked>
+                                            <label class="form-check-label" for="emailNotifications">
+                                                Recevoir les notifications par email
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="smsNotifications" name="smsNotifications">
+                                            <label class="form-check-label" for="smsNotifications">
+                                                Recevoir les notifications par SMS
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="profileVisibility" name="profileVisibility" checked>
+                                            <label class="form-check-label" for="profileVisibility">
+                                                Profil visible par les autres utilisateurs
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="bi bi-save me-1"></i>Enregistrer les préférences
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onglet Historique -->
+                        <div class="tab-pane fade" id="history" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Historique des trajets</h5>
+
+                                    <!-- Filtres -->
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-4">
+                                            <select class="form-select" id="historyFilter">
+                                                <option value="all">Tous les trajets</option>
+                                                <option value="passenger">En tant que passager</option>
+                                                <option value="driver">En tant que conducteur</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="date" class="form-control" id="historyDateFilter" placeholder="Filtrer par date">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button class="btn btn-outline-primary w-100" onclick="exportHistory()">
+                                                <i class="bi bi-download me-1"></i>Exporter l'historique
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Liste des trajets -->
+                                    <div id="historyContainer">
+                                        <!-- Les trajets seront affichés ici -->
+                                    </div>
+
+                                    <div class="text-center d-none" id="noHistoryMessage">
+                                        <i class="bi bi-clock-history text-muted" style="font-size: 4rem;"></i>
+                                        <h5 class="text-muted mt-3">Aucun trajet trouvé</h5>
+                                        <p class="text-muted">Vous n'avez pas encore effectué de trajets</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Onglet Statistiques -->
+                        <div class="tab-pane fade" id="stats" role="tabpanel">
+                            <div class="row g-4">
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-car-front display-4 text-success mb-3"></i>
+                                            <h3 class="text-success" id="totalTrips">0</h3>
+                                            <p class="text-muted mb-0">Trajets effectués</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-currency-euro display-4 text-warning mb-3"></i>
+                                            <h3 class="text-warning" id="totalEarned">0€</h3>
+                                            <p class="text-muted mb-0">Total gagné</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-star display-4 text-info mb-3"></i>
+                                            <h3 class="text-info" id="avgRating">5.0</h3>
+                                            <p class="text-muted mb-0">Note moyenne</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <i class="bi bi-graph-up display-4 text-primary mb-3"></i>
+                                            <h3 class="text-primary" id="ecoImpact">0</h3>
+                                            <p class="text-muted mb-0">kg CO₂ économisés</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Activité récente</h5>
+                                    <div id="recentActivity">
+                                        <!-- L'activité récente sera affichée ici -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-tree me-2"></i>EcoRide</h5>
+                    <p>Voyagez écologique et économique</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Liens utiles</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="mentionsLegales.html" class="text-light">Mentions légales</a></li>
+                        <li><a href="#" class="text-light">Conditions d'utilisation</a></li>
+                        <li><a href="#" class="text-light">Politique de confidentialité</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6>Contact</h6>
+                    <p>
+                        <i class="bi bi-envelope me-2"></i>contact@ecoride.fr<br>
+                        <i class="bi bi-telephone me-2"></i>+33 1 23 45 67 89
+                    </p>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center">
+                <small>&copy; 2024 EcoRide. Tous droits réservés.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/profil.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+# Configuration des routes API
+api_covoiturages:
+    resource: ../src/Controller/Api/CovoiturageController.php
+    type: attribute
+    prefix: /covoiturages
+    name_prefix: api_covoiturage_
+
+api_voitures:
+    resource: ../src/Controller/Api/VoitureController.php
+    type: attribute
+    prefix: /voitures
+    name_prefix: api_voiture_
+
+api_utilisateurs:
+    resource: ../src/Controller/Api/UtilisateurController.php
+    type: attribute
+    prefix: /utilisateurs
+    name_prefix: api_utilisateur_
+
+api_avis:
+    resource: ../src/Controller/Api/AvisController.php
+    type: attribute
+    prefix: /avis
+    name_prefix: api_avis_
+
+api_notifications:
+    resource: ../src/Controller/Api/NotificationController.php
+    type: attribute
+    prefix: /notifications
+    name_prefix: api_notification_
+
+api_statistics:
+    resource: ../src/Controller/Api/StatisticsController.php
+    type: attribute
+    prefix: /statistics
+    name_prefix: api_statistics_
+
+api_security:
+    resource: ../src/Controller/Api/SecurityController.php
+    type: attribute
+    prefix: /auth
+    name_prefix: api_auth_
