@@ -1,163 +1,158 @@
-// Gestion du profil utilisateur
+console.log("Exécution du script profil.js");
+
+const API_BASE_URL = "/api";
+const API_PROFILE_ENDPOINT = `${API_BASE_URL}/security/profile`;
+const API_HISTORY_ENDPOINT = `${API_BASE_URL}/covoiturages/history`;
+const API_STATS_ENDPOINT = `${API_BASE_URL}/statistics/general`;
+const API_RECENT_ACTIVITY_ENDPOINT = `${API_BASE_URL}/statistics/recent-activity`;
+const API_PROFILE_UPDATE_ENDPOINT = `${API_BASE_URL}/security/profile`;
+const API_PASSWORD_ENDPOINT = `${API_BASE_URL}/security/password`;
+const API_PREFERENCES_ENDPOINT = `${API_BASE_URL}/security/preferences`;
+
 class ProfileManager {
     constructor() {
-        this.profileForm = document.getElementById('profileForm');
-        this.passwordForm = document.getElementById('passwordForm');
-        this.securityForm = document.getElementById('securityForm');
-        this.historyContainer = document.getElementById('historyContainer');
-        this.noHistoryMessage = document.getElementById('noHistoryMessage');
-        this.recentActivity = document.getElementById('recentActivity');
+        this.profileForm = document.getElementById("profileForm");
+        this.passwordForm = document.getElementById("passwordForm");
+        this.securityForm = document.getElementById("securityForm");
+        this.historyContainer = document.getElementById("historyContainer");
+        this.noHistoryMessage = document.getElementById("noHistoryMessage");
+        this.recentActivity = document.getElementById("recentActivity");
 
         this.userData = null;
         this.tripsHistory = [];
+        this.stats = null;
+        this.activities = [];
 
         this.init();
     }
 
-    init() {
-        // Charger les données utilisateur
-        this.loadUserData();
+    async init() {
+        await this.loadUserData();
 
-        // Gestion des formulaires
-        this.profileForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveProfile();
+        this.profileForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await this.saveProfile();
         });
 
-        this.passwordForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.changePassword();
+        this.passwordForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await this.changePassword();
         });
 
-        this.securityForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveSecurityPreferences();
+        this.securityForm?.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await this.saveSecurityPreferences();
         });
 
-        // Gestion des filtres d'historique
-        document.getElementById('historyFilter').addEventListener('change', () => this.displayHistory());
-        document.getElementById('historyDateFilter').addEventListener('change', () => this.displayHistory());
+        document.getElementById("historyFilter")?.addEventListener("change", () => this.displayHistory());
+        document.getElementById("historyDateFilter")?.addEventListener("change", () => this.displayHistory());
 
-        // Validation en temps réel
         this.setupValidation();
+    }
+
+    async fetchJson(url, options = {}) {
+        const token = window.getToken ? window.getToken() : null;
+        const headers = {
+            Accept: "application/json",
+            ...(options.body ? { "Content-Type": "application/json" } : {}),
+            ...(options.headers || {}),
+        };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const response = await fetch(url, {
+            ...options,
+            headers,
+            credentials: "include",
+        });
+
+        if (response.status === 401) {
+            throw new Error("Vous devez être connecté pour accéder à votre profil.");
+        }
+        if (!response.ok) {
+            const payload = await response.json().catch(() => ({}));
+            throw new Error(payload.message || payload.error || `Erreur ${response.status}`);
+        }
+
+        if (response.status === 204) return null;
+        return response.json();
     }
 
     async loadUserData() {
         try {
-            // Simulation d'appel API
-            await this.delay(500);
-            this.userData = this.getMockUserData();
-            this.tripsHistory = this.getMockTripsHistory();
+            this.userData = await this.fetchJson(API_PROFILE_ENDPOINT);
             this.displayUserData();
-            this.displayHistory();
-            this.displayStats();
-            this.displayRecentActivity();
         } catch (error) {
-            console.error('Erreur lors du chargement des données:', error);
-            this.showAlert('Erreur lors du chargement du profil', 'danger');
+            console.error("Profil indisponible :", error);
+            this.showAlert(error.message, "danger");
+            return;
         }
-    }
 
-    getMockUserData() {
-        return {
-            id: 1,
-            nom: 'Dupont',
-            prenom: 'Jean',
-            email: 'jean.dupont@email.com',
-            telephone: '06 12 34 56 78',
-            dateNaissance: '1990-05-15',
-            pseudo: 'jeandupont',
-            adresse: '123 Rue de la République, 75001 Paris',
-            biographie: 'Passionné de voyages et d\'écologie, j\'aime partager mes trajets quotidiens.',
-            memberSince: '2024-01-15',
-            lastLogin: new Date().toLocaleDateString('fr-FR'),
-            avatar: null,
-            preferences: {
-                emailNotifications: true,
-                smsNotifications: false,
-                profileVisibility: true
-            }
-        };
-    }
+        try {
+            const history = await this.fetchJson(API_HISTORY_ENDPOINT);
+            this.tripsHistory = Array.isArray(history) ? history : [];
+        } catch (error) {
+            console.warn("Historique indisponible :", error);
+            this.tripsHistory = [];
+        }
+        this.displayHistory();
 
-    getMockTripsHistory() {
-        return [
-            {
-                id: 1,
-                type: 'driver',
-                departure: 'Paris',
-                arrival: 'Lyon',
-                date: '2024-01-10',
-                time: '08:30',
-                price: 25,
-                passengers: 3,
-                rating: 4.8,
-                status: 'completed'
-            },
-            {
-                id: 2,
-                type: 'passenger',
-                departure: 'Lyon',
-                arrival: 'Marseille',
-                date: '2024-01-08',
-                time: '14:20',
-                price: 20,
-                driver: 'Marie Martin',
-                rating: 5.0,
-                status: 'completed'
-            },
-            {
-                id: 3,
-                type: 'driver',
-                departure: 'Paris',
-                arrival: 'Bordeaux',
-                date: '2024-01-05',
-                time: '10:00',
-                price: 30,
-                passengers: 2,
-                rating: 4.9,
-                status: 'completed'
-            }
-        ];
+        try {
+            this.stats = await this.fetchJson(API_STATS_ENDPOINT);
+        } catch (error) {
+            console.warn("Statistiques indisponibles :", error);
+            this.stats = null;
+        }
+        this.displayStats();
+
+        try {
+            const recent = await this.fetchJson(API_RECENT_ACTIVITY_ENDPOINT);
+            this.activities = Array.isArray(recent?.activite_recente) ? recent.activite_recente : (Array.isArray(recent) ? recent : []);
+        } catch (error) {
+            console.warn("Activité récente indisponible :", error);
+            this.activities = [];
+        }
+        this.displayRecentActivity();
     }
 
     displayUserData() {
         if (!this.userData) return;
 
-        // Remplir le formulaire
-        document.getElementById('nom').value = this.userData.nom;
-        document.getElementById('prenom').value = this.userData.prenom;
-        document.getElementById('email').value = this.userData.email;
-        document.getElementById('telephone').value = this.userData.telephone;
-        document.getElementById('dateNaissance').value = this.userData.dateNaissance;
-        document.getElementById('pseudo').value = this.userData.pseudo;
-        document.getElementById('adresse').value = this.userData.adresse;
-        document.getElementById('biographie').value = this.userData.biographie;
+        const safeValue = (value) => value ?? "";
 
-        // Informations du compte
-        document.getElementById('memberSince').textContent = new Date(this.userData.memberSince).toLocaleDateString('fr-FR');
-        document.getElementById('lastLogin').textContent = this.userData.lastLogin;
+        document.getElementById("nom").value = safeValue(this.userData.nom);
+        document.getElementById("prenom").value = safeValue(this.userData.prenom);
+        document.getElementById("email").value = safeValue(this.userData.email);
+        document.getElementById("telephone").value = safeValue(this.userData.telephone);
+        document.getElementById("dateNaissance").value = safeValue(this.userData.dateNaissance);
+        document.getElementById("pseudo").value = safeValue(this.userData.pseudo);
+        document.getElementById("adresse").value = safeValue(this.userData.adresse);
+        document.getElementById("biographie").value = safeValue(this.userData.biographie);
 
-        // Préférences de sécurité
-        document.getElementById('emailNotifications').checked = this.userData.preferences.emailNotifications;
-        document.getElementById('smsNotifications').checked = this.userData.preferences.smsNotifications;
-        document.getElementById('profileVisibility').checked = this.userData.preferences.profileVisibility;
+        const creationDate = this.userData.memberSince || this.userData.dateCreation;
+        document.getElementById("memberSince").textContent = creationDate ? new Date(creationDate).toLocaleDateString("fr-FR") : "NC";
+        document.getElementById("lastLogin").textContent = this.userData.lastLogin ? new Date(this.userData.lastLogin).toLocaleString("fr-FR") : "NC";
+
+        const prefs = this.userData.preferences || {};
+        document.getElementById("emailNotifications").checked = !!prefs.emailNotifications;
+        document.getElementById("smsNotifications").checked = !!prefs.smsNotifications;
+        document.getElementById("profileVisibility").checked = prefs.profileVisibility !== false;
     }
 
     displayHistory() {
-        const filter = document.getElementById('historyFilter').value;
-        const dateFilter = document.getElementById('historyDateFilter').value;
+        const filter = document.getElementById("historyFilter")?.value || "all";
+        const dateFilter = document.getElementById("historyDateFilter")?.value;
 
-        let filteredTrips = [...this.tripsHistory];
+        let filteredTrips = Array.isArray(this.tripsHistory) ? [...this.tripsHistory] : [];
 
-        // Filtrage par type
-        if (filter !== 'all') {
-            filteredTrips = filteredTrips.filter(trip => trip.type === filter);
+        if (filter !== "all") {
+            filteredTrips = filteredTrips.filter((trip) => (trip.type || trip.role) === filter);
         }
 
-        // Filtrage par date
         if (dateFilter) {
-            filteredTrips = filteredTrips.filter(trip => trip.date >= dateFilter);
+            filteredTrips = filteredTrips.filter((trip) => {
+                const tripDate = trip.date || trip.dateDepart?.slice(0, 10);
+                return tripDate >= dateFilter;
+            });
         }
 
         if (filteredTrips.length === 0) {
@@ -167,302 +162,244 @@ class ProfileManager {
 
         this.hideNoHistoryMessage();
 
-        this.historyContainer.innerHTML = filteredTrips.map(trip => `
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center">
-                                <div class="trip-icon me-3">
-                                    <i class="bi bi-${trip.type === 'driver' ? 'car-front' : 'person'} display-6 text-${trip.type === 'driver' ? 'success' : 'info'}"></i>
+        this.historyContainer.innerHTML = filteredTrips
+            .map((trip) => {
+                const type = trip.type || trip.role || "passenger";
+                const departure = trip.departure || trip.lieuDepart || "Ville inconnue";
+                const arrival = trip.arrival || trip.lieuArrivee || "Ville inconnue";
+                const date = trip.date || trip.dateDepart?.slice(0, 10);
+                const time = trip.time || trip.dateDepart?.slice(11, 16) || "--:--";
+                const price = trip.price ?? trip.prix ?? trip.prixPersonne ?? 0;
+                const rating = trip.rating ?? trip.note ?? 0;
+                const driver = trip.driver || trip.conducteur?.pseudo || trip.conducteur?.nom || "Conducteur";
+                const status = trip.status || trip.statut || "completed";
+
+                return `
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="trip-icon me-3">
+                                            <i class="bi bi-${type === "driver" ? "car-front" : "person"} display-6 text-${type === "driver" ? "success" : "info"}"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">${departure} → ${arrival}</h6>
+                                            <p class="text-muted mb-0">
+                                                <i class="bi bi-calendar-event me-1"></i>${this.formatDate(date)}
+                                                <i class="bi bi-clock ms-2 me-1"></i>${time}
+                                            </p>
+                                            <small class="text-muted">
+                                                ${type === "driver" ? "Conducteur" : `Passager chez ${driver}`}
+                                            </small>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h6 class="mb-1">${trip.departure} → ${trip.arrival}</h6>
-                                    <p class="text-muted mb-0">
-                                        <i class="bi bi-calendar-event me-1"></i>${this.formatDate(trip.date)}
-                                        <i class="bi bi-clock ms-2 me-1"></i>${trip.time}
-                                    </p>
-                                    <small class="text-muted">
-                                        ${trip.type === 'driver' ? 'Conducteur' : `Passager chez ${trip.driver}`}
-                                    </small>
+                                <div class="col-md-3 text-center">
+                                    <div class="mb-2">
+                                        <span class="h5 text-success mb-0">${Number(price).toFixed(2)}€</span>
+                                    </div>
+                                    <small class="text-muted">Prix payé</small>
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    <div class="rating mb-2">
+                                        ${"★".repeat(Math.round(rating))}${"☆".repeat(5 - Math.round(rating))}
+                                        <span class="text-muted ms-1">(${rating || "N/A"})</span>
+                                    </div>
+                                    <span class="badge bg-success">${status === "completed" ? "Terminé" : "En cours"}</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <div class="mb-2">
-                                <span class="h5 text-success mb-0">${trip.price}€</span>
-                            </div>
-                            <small class="text-muted">Prix payé</small>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <div class="rating mb-2">
-                                ${'★'.repeat(Math.floor(trip.rating))}${'☆'.repeat(5 - Math.floor(trip.rating))}
-                                <span class="text-muted ms-1">(${trip.rating})</span>
-                            </div>
-                            <span class="badge bg-success">${trip.status === 'completed' ? 'Terminé' : 'En cours'}</span>
                         </div>
                     </div>
-                </div>
-            </div>
-        `).join('');
+                `;
+            })
+            .join("");
+
+        this.attachHistoryActions();
     }
 
     displayStats() {
-        const totalTrips = this.tripsHistory.length;
-        const totalEarned = this.tripsHistory
-            .filter(trip => trip.type === 'driver')
-            .reduce((sum, trip) => sum + trip.price, 0);
-        const avgRating = this.tripsHistory.reduce((sum, trip) => sum + trip.rating, 0) / totalTrips;
-        const ecoImpact = Math.round(totalTrips * 15.5); // Estimation CO2 économisé
-
-        document.getElementById('totalTrips').textContent = totalTrips;
-        document.getElementById('totalEarned').textContent = totalEarned + '€';
-        document.getElementById('avgRating').textContent = avgRating.toFixed(1);
-        document.getElementById('ecoImpact').textContent = ecoImpact;
-    }
-
-    displayRecentActivity() {
-        const activities = [
-            {
-                type: 'trip_completed',
-                message: 'Trajet Paris → Lyon terminé avec succès',
-                date: '2024-01-10',
-                icon: 'bi-check-circle text-success'
-            },
-            {
-                type: 'rating_received',
-                message: 'Nouvelle évaluation reçue (4.8/5)',
-                date: '2024-01-09',
-                icon: 'bi-star text-warning'
-            },
-            {
-                type: 'profile_updated',
-                message: 'Profil mis à jour',
-                date: '2024-01-08',
-                icon: 'bi-pencil text-info'
-            }
-        ];
-
-        this.recentActivity.innerHTML = activities.map(activity => `
-            <div class="d-flex align-items-start mb-3">
-                <div class="activity-icon me-3">
-                    <i class="bi ${activity.icon}"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <p class="mb-1">${activity.message}</p>
-                    <small class="text-muted">${this.formatDate(activity.date)}</small>
-                </div>
-            </div>
-        `).join('<hr>');
-    }
-
-    showNoHistoryMessage() {
-        this.historyContainer.innerHTML = '';
-        this.noHistoryMessage.classList.remove('d-none');
-    }
-
-    hideNoHistoryMessage() {
-        this.noHistoryMessage.classList.add('d-none');
-    }
-
-    async saveProfile() {
-        const formData = new FormData(this.profileForm);
-        const profileData = {
-            nom: formData.get('nom'),
-            prenom: formData.get('prenom'),
-            email: formData.get('email'),
-            telephone: formData.get('telephone'),
-            dateNaissance: formData.get('dateNaissance'),
-            pseudo: formData.get('pseudo'),
-            adresse: formData.get('adresse'),
-            biographie: formData.get('biographie')
-        };
-
-        // Validation
-        if (!this.validateProfileData(profileData)) {
+        if (this.stats) {
+            document.getElementById("totalTrips").textContent = this.stats.general?.total_covoiturages ?? this.stats.totalCovoiturages ?? this.tripsHistory.length;
+            document.getElementById("totalEarned").textContent = `${this.stats.financier?.credits_totaux ?? this.stats.totalCredits ?? 0}€`;
+            document.getElementById("avgRating").textContent = (this.stats.avis?.note_moyenne ?? this.stats.averageRating ?? 0).toFixed(1);
+            document.getElementById("ecoImpact").textContent = this.stats.general?.covoiturages_disponibles ?? this.stats.ecoImpact ?? 0;
             return;
         }
 
-        try {
-            // Simulation d'appel API
-            await this.delay(1000);
+        const totalTrips = this.tripsHistory.length;
+        const totalEarned = this.tripsHistory.filter((trip) => (trip.type || trip.role) === "driver").reduce((sum, trip) => sum + (trip.price || 0), 0);
+        const avgRating = totalTrips > 0 ? this.tripsHistory.reduce((sum, trip) => sum + (trip.rating || 0), 0) / totalTrips : 0;
+        const ecoImpact = Math.round(totalTrips * 15.5);
 
-            this.userData = { ...this.userData, ...profileData };
-            this.showAlert('Profil mis à jour avec succès', 'success');
+        document.getElementById("totalTrips").textContent = totalTrips;
+        document.getElementById("totalEarned").textContent = `${totalEarned.toFixed(2)}€`;
+        document.getElementById("avgRating").textContent = avgRating.toFixed(1);
+        document.getElementById("ecoImpact").textContent = ecoImpact;
+    }
+
+    displayRecentActivity() {
+        if (!this.recentActivity) return;
+        if (!this.activities.length) {
+            this.recentActivity.innerHTML = '<p class="text-muted">Aucune activité récente.</p>';
+            return;
+        }
+
+        this.recentActivity.innerHTML = this.activities
+            .map((activity) => `
+                <div class="d-flex align-items-start mb-3">
+                    <div class="activity-icon me-3">
+                        <i class="bi ${activity.icon || "bi-bell"} ${activity.iconClass || ""}"></i>
+                    </div>
+                    <div>
+                        <p class="mb-1">${activity.message || activity.libelle || "Nouvelle activité"}</p>
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>${this.formatDate(activity.date || activity.date_evenement || "")}
+                        </small>
+                    </div>
+                </div>
+            `)
+            .join("");
+    }
+
+    async saveProfile() {
+        const formData = {
+            nom: this.profileForm.nom.value,
+            prenom: this.profileForm.prenom.value,
+            telephone: this.profileForm.telephone.value,
+            dateNaissance: this.profileForm.dateNaissance.value,
+            pseudo: this.profileForm.pseudo.value,
+            adresse: this.profileForm.adresse.value,
+            biographie: this.profileForm.biographie.value,
+        };
+
+        try {
+            await this.fetchJson(API_PROFILE_UPDATE_ENDPOINT, {
+                method: "PUT",
+                body: JSON.stringify(formData),
+            });
+            this.showAlert("Profil mis à jour avec succès.", "success");
+            await this.loadUserData();
         } catch (error) {
-            console.error('Erreur lors de la sauvegarde:', error);
-            this.showAlert('Erreur lors de la sauvegarde du profil', 'danger');
+            console.error(error);
+            this.showAlert(error.message || "Impossible de mettre à jour le profil.", "danger");
         }
     }
 
     async changePassword() {
-        const formData = new FormData(this.passwordForm);
-        const passwordData = {
-            currentPassword: formData.get('currentPassword'),
-            newPassword: formData.get('newPassword'),
-            confirmPassword: formData.get('confirmPassword')
-        };
+        const currentPassword = this.passwordForm.currentPassword.value;
+        const newPassword = this.passwordForm.newPassword.value;
+        const confirmPassword = this.passwordForm.confirmPassword.value;
 
-        // Validation
-        if (!this.validatePasswordData(passwordData)) {
+        if (newPassword !== confirmPassword) {
+            this.showAlert("Les mots de passe ne correspondent pas.", "warning");
             return;
         }
 
         try {
-            // Simulation d'appel API
-            await this.delay(1000);
-
+            await this.fetchJson(API_PASSWORD_ENDPOINT, {
+                method: "POST",
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+            this.showAlert("Mot de passe mis à jour.", "success");
             this.passwordForm.reset();
-            this.showAlert('Mot de passe changé avec succès', 'success');
         } catch (error) {
-            console.error('Erreur lors du changement de mot de passe:', error);
-            this.showAlert('Erreur lors du changement de mot de passe', 'danger');
+            console.error(error);
+            this.showAlert(error.message || "Impossible de mettre à jour le mot de passe.", "danger");
         }
     }
 
     async saveSecurityPreferences() {
-        const formData = new FormData(this.securityForm);
         const preferences = {
-            emailNotifications: formData.get('emailNotifications') === 'on',
-            smsNotifications: formData.get('smsNotifications') === 'on',
-            profileVisibility: formData.get('profileVisibility') === 'on'
+            emailNotifications: this.securityForm.emailNotifications.checked,
+            smsNotifications: this.securityForm.smsNotifications.checked,
+            profileVisibility: this.securityForm.profileVisibility.checked,
         };
 
         try {
-            // Simulation d'appel API
-            await this.delay(500);
-
-            this.userData.preferences = preferences;
-            this.showAlert('Préférences sauvegardées', 'success');
+            await this.fetchJson(API_PREFERENCES_ENDPOINT, {
+                method: "PATCH",
+                body: JSON.stringify(preferences),
+            });
+            this.showAlert("Préférences mises à jour.", "success");
         } catch (error) {
-            console.error('Erreur lors de la sauvegarde:', error);
-            this.showAlert('Erreur lors de la sauvegarde des préférences', 'danger');
+            console.error(error);
+            this.showAlert(error.message || "Impossible de mettre à jour les préférences.", "danger");
         }
     }
 
-    validateProfileData(data) {
-        if (!data.nom || !data.prenom || !data.email || !data.pseudo) {
-            this.showAlert('Veuillez remplir tous les champs obligatoires', 'warning');
-            return false;
-        }
+    attachHistoryActions() {
+        this.historyContainer?.querySelectorAll("[data-action]").forEach((button) => {
+            const action = button.dataset.action;
+            const tripId = button.dataset.tripId;
 
-        if (!this.isValidEmail(data.email)) {
-            this.showAlert('Adresse email invalide', 'warning');
-            return false;
-        }
-
-        return true;
+            if (action === "cancel") {
+                button.addEventListener("click", () => this.cancelTrip(tripId));
+            } else if (action === "view") {
+                button.addEventListener("click", () => this.viewTrip(tripId));
+            }
+        });
     }
 
-    validatePasswordData(data) {
-        if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
-            this.showAlert('Veuillez remplir tous les champs', 'warning');
-            return false;
-        }
-
-        if (data.newPassword !== data.confirmPassword) {
-            this.showAlert('Les mots de passe ne correspondent pas', 'warning');
-            return false;
-        }
-
-        if (data.newPassword.length < 8) {
-            this.showAlert('Le mot de passe doit contenir au moins 8 caractères', 'warning');
-            return false;
-        }
-
-        return true;
+    cancelTrip(tripId) {
+        console.log(`Annulation du trajet ${tripId} (implémentation backend nécessaire).`);
+        this.showAlert("La fonctionnalité d’annulation sera disponible prochainement.", "info");
     }
 
-    isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
+    viewTrip(tripId) {
+        window.location.href = `/covoiturages/${tripId}`;
     }
 
     setupValidation() {
-        // Validation email en temps réel
-        document.getElementById('email').addEventListener('blur', (e) => {
-            if (e.target.value && !this.isValidEmail(e.target.value)) {
-                e.target.classList.add('is-invalid');
-            } else {
-                e.target.classList.remove('is-invalid');
-            }
+        const emailInput = document.getElementById("email");
+        emailInput?.addEventListener("blur", (event) => {
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(event.target.value);
+            event.target.classList.toggle("is-invalid", !isValid);
         });
 
-        // Validation mot de passe en temps réel
-        document.getElementById('newPassword').addEventListener('input', (e) => {
-            const password = e.target.value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordInput = document.getElementById("newPassword");
+        const confirmInput = document.getElementById("confirmPassword");
 
-            if (password.length < 8) {
-                e.target.classList.add('is-invalid');
-            } else {
-                e.target.classList.remove('is-invalid');
-            }
-
-            if (confirmPassword && password !== confirmPassword) {
-                document.getElementById('confirmPassword').classList.add('is-invalid');
-            } else if (confirmPassword) {
-                document.getElementById('confirmPassword').classList.remove('is-invalid');
-            }
+        passwordInput?.addEventListener("input", () => {
+            const isValid = passwordInput.value.length >= 8;
+            passwordInput.classList.toggle("is-invalid", !isValid);
         });
 
-        document.getElementById('confirmPassword').addEventListener('input', (e) => {
-            const password = document.getElementById('newPassword').value;
-            const confirmPassword = e.target.value;
-
-            if (password !== confirmPassword) {
-                e.target.classList.add('is-invalid');
-            } else {
-                e.target.classList.remove('is-invalid');
-            }
+        confirmInput?.addEventListener("input", () => {
+            const matches = confirmInput.value === passwordInput.value;
+            confirmInput.classList.toggle("is-invalid", !matches);
         });
     }
 
-    formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-    }
-
-    showAlert(message, type) {
-        const alertDiv = document.createElement('div');
+    showAlert(message, type = "info") {
+        const alertDiv = document.createElement("div");
         alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 320px;";
         alertDiv.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
 
         document.body.appendChild(alertDiv);
-
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
+        setTimeout(() => alertDiv.remove(), 6000);
     }
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    showNoHistoryMessage() {
+        this.historyContainer.innerHTML = "";
+        if (this.noHistoryMessage) this.noHistoryMessage.classList.remove("d-none");
+    }
+
+    hideNoHistoryMessage() {
+        if (this.noHistoryMessage) this.noHistoryMessage.classList.add("d-none");
+    }
+
+    formatDate(dateString) {
+        if (!dateString) return "Date inconnue";
+        return new Date(dateString).toLocaleDateString("fr-FR");
     }
 }
 
-// Fonctions globales
-function changeAvatar() {
-    // Simulation de changement d'avatar
-    window.profileManager.showAlert('Fonctionnalité de changement d\'avatar à implémenter', 'info');
-}
-
-function exportHistory() {
-    // Simulation d'export d'historique
-    window.profileManager.showAlert('Export de l\'historique en cours...', 'info');
-}
-
-// Initialisation
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     window.profileManager = new ProfileManager();
 });
+
